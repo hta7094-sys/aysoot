@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aysoot Pro - คำนวณต้นทุน</title>
+    <title>Aysoot - Social Cooking</title>
     
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.6.0/dist/full.min.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,30 +15,72 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/plugin/relativeTime.min.js"></script>
 
     <style>
-        body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; padding-bottom: 80px; }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f0f9ff; /* ฟ้าอ่อนสบายตา */
+            min-height: 100vh;
+            /* แก้ปัญหาเลื่อนไม่ไป */
+            overflow-x: hidden; 
+            touch-action: manipulation;
+        }
+
+        /* พื้นหลังลาย (แก้ให้ไม่บังการกดจอ) */
         .bg-pattern {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 20px 20px; opacity: 0.4;
-        }
-        
-        /* Bottom Nav Styling */
-        .btm-nav { z-index: 50; height: 4.5rem; border-top: 1px solid #e2e8f0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
-        .btm-nav .active { color: #f97316; border-top: 3px solid #f97316; background-color: #fff7ed; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        /* Cost Card */
-        .bill-card {
-            background-image: repeating-linear-gradient(0deg, transparent, transparent 19px, #e2e8f0 20px);
-            background-size: 100% 20px;
-            line-height: 20px;
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px);
+            background-size: 24px 24px;
+            opacity: 0.6;
+            pointer-events: none; /* สำคัญ! ทำให้กดทะลุพื้นหลังได้ */
         }
 
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        /* Top Bar สไตล์เดิม (Glass Effect) */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Bottom Nav */
+        .btm-nav {
+            z-index: 50;
+            height: 4.5rem;
+            border-top: 1px solid #e2e8f0;
+            background: rgba(255,255,255,0.98);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .btm-nav .active {
+            color: #ea580c; /* สีส้ม */
+            border-top: 3px solid #ea580c;
+            background-color: #fff7ed;
+        }
+
+        /* --- ปรับแต่ง Popup ให้ปุ่มชัดเจน --- */
+        div:where(.swal2-container) { z-index: 10000 !important; }
+        .swal2-popup { border-radius: 24px !important; padding: 1.5em !important; }
+        .swal2-title { font-size: 1.5rem !important; color: #334155 !important; }
+        
+        /* ปุ่มยืนยัน (สีเขียว/ส้ม) */
+        .swal2-confirm {
+            background-color: #22c55e !important; /* เขียวสดใส */
+            color: white !important;
+            border-radius: 50px !important;
+            padding: 12px 30px !important;
+            font-size: 1rem !important;
+            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4) !important;
+        }
+        /* ปุ่มยกเลิก (สีแดง) */
+        .swal2-cancel {
+            background-color: #ef4444 !important; /* แดง */
+            color: white !important;
+            border-radius: 50px !important;
+            padding: 12px 30px !important;
+            font-size: 1rem !important;
+        }
+        .swal2-actions { gap: 15px !important; margin-top: 20px !important; }
+
+        /* Animation */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -46,89 +88,99 @@
 
     <div class="bg-pattern"></div>
 
-    <div class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-40 border-b border-slate-200 px-4 py-3 flex justify-between items-center lg:hidden">
-        <div class="font-bold text-xl text-orange-500"><i class="fa-solid fa-utensils"></i> Aysoot</div>
-        <div id="top-user-info" class="text-xs text-slate-500"></div>
+    <div class="fixed top-0 left-0 right-0 z-40 glass-nav px-4 py-3 flex justify-between items-center transition-all">
+        <div class="flex items-center gap-2" onclick="app.navTo('home')">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 text-white flex items-center justify-center text-xl shadow-md">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <span class="font-bold text-xl text-slate-700 tracking-tight">Aysoot</span>
+        </div>
+        <div id="top-profile" class="flex items-center gap-2">
+            </div>
     </div>
 
-    <main id="app-root" class="container mx-auto px-4 pt-20 max-w-2xl min-h-screen">
+    <main id="app-root" class="container mx-auto px-4 pt-24 pb-32 max-w-2xl min-h-screen">
         </main>
 
-    <div id="bottom-nav" class="btm-nav hidden">
-        <button onclick="app.navTo('home')" id="nav-home" class="text-slate-500">
-            <i class="fa-solid fa-book text-xl"></i>
-            <span class="btm-nav-label text-xs">สูตรของฉัน</span>
+    <div id="bottom-nav" class="btm-nav hidden shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+        <button onclick="app.navTo('home')" id="nav-home" class="text-slate-400 hover:text-orange-500 transition">
+            <i class="fa-solid fa-book text-lg mb-1"></i>
+            <span class="btm-nav-label text-[10px]">สูตรฉัน</span>
         </button>
-        <button onclick="app.navTo('search')" id="nav-search" class="text-slate-500">
-            <i class="fa-solid fa-search text-xl"></i>
-            <span class="btm-nav-label text-xs">ค้นหา</span>
+        
+        <button onclick="app.openCreateModal()" class="active:scale-95 transition-transform z-10 -mt-8">
+            <div class="w-14 h-14 bg-slate-800 text-white rounded-full flex items-center justify-center shadow-xl border-4 border-white text-2xl">
+                <i class="fa-solid fa-plus"></i>
+            </div>
         </button>
-        <button onclick="app.openCreateModal()" class="text-white bg-slate-800 rounded-full w-12 h-12 -mt-6 border-4 border-slate-50 shadow-lg scale-110">
-            <i class="fa-solid fa-plus text-xl"></i>
-        </button>
-        <button onclick="app.navTo('profile')" id="nav-profile" class="text-slate-500">
-            <i class="fa-solid fa-user text-xl"></i>
-            <span class="btm-nav-label text-xs">โปรไฟล์</span>
+
+        <button onclick="app.navTo('search')" id="nav-search" class="text-slate-400 hover:text-orange-500 transition">
+            <i class="fa-solid fa-search text-lg mb-1"></i>
+            <span class="btm-nav-label text-[10px]">ค้นหา</span>
         </button>
     </div>
 
     <dialog id="modal_auth" class="modal modal-bottom sm:modal-middle">
-        <div class="modal-box bg-white rounded-t-3xl sm:rounded-3xl p-8">
-            <h3 class="text-2xl font-bold text-center mb-2">ยินดีต้อนรับ</h3>
-            <p class="text-center text-gray-400 text-sm mb-6">เข้าสู่ระบบเพื่อจัดการต้นทุนสูตรอาหาร</p>
+        <div class="modal-box bg-white rounded-3xl p-8">
+            <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+            <h3 class="text-2xl font-bold text-center mb-6 text-slate-700">เข้าสู่ระบบ</h3>
             <form id="auth-form" class="space-y-4">
-                <div id="field-name" class="hidden"><input type="text" id="inp-name" class="input input-bordered w-full rounded-xl" placeholder="ชื่อเชฟ"></div>
-                <input type="email" id="inp-email" class="input input-bordered w-full rounded-xl" placeholder="อีเมล" required>
-                <input type="password" id="inp-pass" class="input input-bordered w-full rounded-xl" placeholder="รหัสผ่าน" required>
-                <button type="submit" class="btn bg-orange-500 hover:bg-orange-600 border-none text-white w-full rounded-xl text-lg shadow-lg">ยืนยัน</button>
+                <div id="field-name" class="hidden"><input type="text" id="inp-name" class="input input-bordered w-full rounded-2xl bg-slate-50" placeholder="ชื่อที่ใช้แสดง"></div>
+                <input type="email" id="inp-email" class="input input-bordered w-full rounded-2xl bg-slate-50" placeholder="อีเมล" required>
+                <input type="password" id="inp-pass" class="input input-bordered w-full rounded-2xl bg-slate-50" placeholder="รหัสผ่าน" required>
+                <button type="submit" class="btn bg-slate-800 text-white w-full rounded-2xl text-lg shadow-lg mt-2">ยืนยัน</button>
             </form>
-            <p class="text-center mt-6 text-sm text-gray-500 cursor-pointer" onclick="app.toggleAuth()">
-                <span id="auth-toggle-text" class="underline decoration-orange-300">สมัครสมาชิกใหม่</span>
+            <p class="text-center mt-6 text-sm text-gray-400 cursor-pointer" onclick="app.toggleAuth()">
+                <span id="auth-toggle-text" class="underline hover:text-orange-500">ยังไม่มีบัญชี? สมัครสมาชิก</span>
             </p>
         </div>
     </dialog>
 
     <dialog id="modal_create" class="modal">
-        <div class="modal-box w-full h-full max-h-full max-w-full sm:rounded-3xl sm:h-[90vh] sm:max-w-3xl bg-slate-50 p-0 flex flex-col">
-            <div class="bg-white px-4 py-3 border-b flex justify-between items-center sticky top-0 z-10">
-                <button class="btn btn-sm btn-ghost" onclick="modal_create.close()">ยกเลิก</button>
-                <h3 class="font-bold text-lg">จดสูตร & ต้นทุน</h3>
-                <button onclick="app.saveRecipe()" class="btn btn-sm bg-slate-800 text-white rounded-full px-6">บันทึก</button>
+        <div class="modal-box w-full h-full max-h-full max-w-full sm:rounded-3xl sm:h-auto sm:max-w-2xl bg-white p-0 flex flex-col">
+            <div class="px-4 py-3 border-b flex justify-between items-center bg-white sticky top-0 z-10 shadow-sm">
+                <button class="btn btn-ghost btn-circle text-slate-400" onclick="modal_create.close()"><i class="fa-solid fa-times text-xl"></i></button>
+                <h3 class="font-bold text-lg text-slate-700">จดสูตรใหม่</h3>
+                <button onclick="app.confirmSave()" class="btn btn-sm bg-green-500 hover:bg-green-600 text-white rounded-full px-6 border-none shadow">บันทึก</button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-4 space-y-6 pb-20">
-                <div class="form-control">
-                    <label class="label font-bold text-gray-500">ชื่อเมนู</label>
-                    <input type="text" id="recipe-name" class="input input-lg w-full font-bold text-xl bg-white shadow-sm" placeholder="เช่น กะเพราหมูสับ (ต้นทุนต่ำ)">
+            <div class="flex-1 overflow-y-auto p-5 space-y-6 pb-20 bg-slate-50">
+                <div class="bg-white p-4 rounded-2xl shadow-sm">
+                    <label class="label font-bold text-slate-500 text-xs uppercase">ชื่อเมนู</label>
+                    <input type="text" id="recipe-name" class="input w-full font-bold text-xl border-none focus:outline-none placeholder-slate-300 p-0" placeholder="เช่น ข้าวกะเพราไก่ไข่ดาว">
                 </div>
 
-                <div class="card bg-white shadow-sm border border-slate-200">
-                    <div class="card-body p-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-orange-600"><i class="fa-solid fa-coins"></i> วัตถุดิบ & ต้นทุน</span>
-                        </div>
-                        <div class="grid grid-cols-12 gap-2 text-xs text-slate-400 mb-2 px-2">
-                            <div class="col-span-6">รายการ</div>
-                            <div class="col-span-3 text-center">ปริมาณ</div>
-                            <div class="col-span-3 text-right">ราคา(บาท)</div>
-                        </div>
-                        <div id="ing-list" class="space-y-2"></div>
-                        <button onclick="app.addIng()" class="btn btn-sm btn-ghost w-full mt-2 text-slate-400 border-dashed border-slate-300">+ เพิ่มรายการ</button>
-                        
-                        <div class="divider my-2"></div>
-                        <div class="flex justify-between items-center font-bold text-slate-700">
-                            <span>รวมต้นทุนโดยประมาณ:</span>
-                            <span id="total-cost-display" class="text-xl text-green-600">0 ฿</span>
-                        </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                        <span class="font-bold text-orange-500"><i class="fa-solid fa-basket-shopping"></i> วัตถุดิบ & ต้นทุน</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-12 gap-2 text-xs text-slate-400 mb-2 px-1">
+                        <div class="col-span-6">รายการ</div>
+                        <div class="col-span-3 text-center">ปริมาณ</div>
+                        <div class="col-span-3 text-right">ทุน(บาท)</div>
+                    </div>
+                    
+                    <div id="ing-list" class="space-y-2"></div>
+                    
+                    <button onclick="app.addIng()" class="btn btn-sm btn-outline btn-warning w-full mt-4 rounded-xl border-dashed">
+                        + เพิ่มวัตถุดิบ
+                    </button>
+                    
+                    <div class="mt-4 bg-orange-50 p-3 rounded-xl flex justify-between items-center">
+                        <span class="text-sm font-bold text-orange-800">ต้นทุนรวม:</span>
+                        <span id="total-cost-display" class="text-xl font-bold text-orange-600">0 ฿</span>
                     </div>
                 </div>
 
-                <div class="card bg-white shadow-sm border border-slate-200">
-                    <div class="card-body p-4">
-                        <span class="font-bold text-blue-600 mb-2"><i class="fa-solid fa-list-ol"></i> วิธีทำ</span>
-                        <div id="step-list" class="space-y-2"></div>
-                        <button onclick="app.addStep()" class="btn btn-sm btn-ghost w-full mt-2 text-slate-400 border-dashed border-slate-300">+ เพิ่มขั้นตอน</button>
+                <div class="bg-white p-4 rounded-2xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+                        <span class="font-bold text-blue-500"><i class="fa-solid fa-list-ol"></i> วิธีทำ</span>
                     </div>
+                    <div id="step-list" class="space-y-3"></div>
+                    <button onclick="app.addStep()" class="btn btn-sm btn-outline btn-info w-full mt-4 rounded-xl border-dashed">
+                        + เพิ่มขั้นตอน
+                    </button>
                 </div>
             </div>
         </div>
@@ -152,7 +204,7 @@
         const auth = getAuth(appFire);
         const db = getFirestore(appFire);
 
-        window.state = { user: null, mode: 'login', currentPage: 'home' };
+        window.state = { user: null, mode: 'login' };
         dayjs.locale('th'); dayjs.extend(window.dayjs_plugin_relativeTime);
 
         window.app = {
@@ -161,124 +213,111 @@
                     state.user = u;
                     if(u) {
                         document.getElementById('bottom-nav').classList.remove('hidden');
-                        document.getElementById('top-user-info').textContent = u.displayName;
+                        document.getElementById('bottom-nav').classList.add('flex');
+                        // Profile in top bar
+                        document.getElementById('top-profile').innerHTML = `
+                             <span class="text-sm font-bold text-slate-600 mr-2">${u.displayName || 'Chef'}</span>
+                             <div class="dropdown dropdown-end">
+                                <div tabindex="0" role="button" class="avatar">
+                                    <div class="w-9 rounded-full border border-slate-200 shadow-sm"><img src="https://ui-avatars.com/api/?name=${u.displayName}&background=random" /></div>
+                                </div>
+                                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                                    <li><a onclick="app.logout()" class="text-red-500">ออกจากระบบ</a></li>
+                                </ul>
+                             </div>
+                        `;
                         app.navTo('home');
                     } else {
                         document.getElementById('bottom-nav').classList.add('hidden');
-                        document.getElementById('top-user-info').textContent = '';
+                        document.getElementById('bottom-nav').classList.remove('flex');
+                        document.getElementById('top-profile').innerHTML = `<button onclick="app.openAuth('login')" class="btn btn-sm btn-neutral rounded-full">เข้าสู่ระบบ</button>`;
                         app.renderLogin();
                     }
                 });
             },
 
-            // --- Navigation System ---
             navTo: (page) => {
-                state.currentPage = page;
-                
-                // Update UI Buttons
                 document.querySelectorAll('.btm-nav button').forEach(b => b.classList.remove('active'));
-                if(page !== 'create') {
-                     const btn = document.getElementById(`nav-${page}`);
-                     if(btn) btn.classList.add('active');
-                }
-
-                // Render Page
-                const root = document.getElementById('app-root');
-                root.innerHTML = ''; 
+                const btn = document.getElementById(`nav-${page}`);
+                if(btn) btn.classList.add('active');
                 
                 if(page === 'home') app.renderMyRecipes();
                 else if(page === 'search') app.renderSearch();
-                else if(page === 'profile') app.renderProfile();
             },
 
-            // --- Page 1: My Recipes (Dashboard) ---
+            // --- Home: My Recipes ---
             renderMyRecipes: async () => {
                 const root = document.getElementById('app-root');
-                root.innerHTML = `
-                    <div class="flex justify-between items-center mb-4 fade-in">
-                        <h1 class="text-2xl font-bold">สูตรของฉัน</h1>
-                        <div class="badge badge-neutral">ล่าสุด</div>
-                    </div>
-                    <div id="recipe-grid" class="grid gap-3 pb-20">
-                        <div class="skeleton h-32 w-full rounded-2xl"></div>
-                        <div class="skeleton h-32 w-full rounded-2xl"></div>
-                    </div>
-                `;
-
+                root.innerHTML = `<div class="text-center pt-20"><span class="loading loading-spinner text-orange-500 loading-lg"></span></div>`;
+                
                 try {
                     const q = query(collection(db, "recipes"), where("ownerId", "==", state.user.uid));
                     const snap = await getDocs(q);
                     const recipes = [];
                     snap.forEach(d => recipes.push({ id: d.id, ...d.data() }));
                     
-                    // Sort: Favorites first, then Date
-                    recipes.sort((a, b) => {
-                        if (b.isBest === a.isBest) return b.createdAt?.seconds - a.createdAt?.seconds;
-                        return b.isBest ? 1 : -1;
-                    });
+                    // Sort: Best First
+                    recipes.sort((a, b) => (b.isBest === a.isBest) ? (b.createdAt?.seconds - a.createdAt?.seconds) : (b.isBest ? 1 : -1));
 
-                    const grid = document.getElementById('recipe-grid');
                     if(recipes.length === 0) {
-                        grid.innerHTML = `
-                            <div class="text-center py-10 bg-white rounded-2xl border border-dashed">
-                                <i class="fa-solid fa-utensils text-4xl text-slate-200 mb-2"></i>
-                                <p class="text-slate-400">ยังไม่มีสูตร กด + เพื่อเริ่ม</p>
+                        root.innerHTML = `
+                            <div class="flex flex-col items-center justify-center pt-20 opacity-50 fade-in">
+                                <i class="fa-solid fa-basket-shopping text-6xl mb-4 text-slate-300"></i>
+                                <p>เริ่มจดสูตรแรกของคุณได้เลย</p>
                             </div>`;
                         return;
                     }
 
-                    grid.innerHTML = recipes.map(r => {
-                        // Calculate Total Cost Display
-                        const totalCost = r.ingredients.reduce((sum, i) => sum + (parseFloat(i.price) || 0), 0);
-                        
-                        return `
-                        <div onclick="app.viewRecipe('${r.id}')" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 relative fade-in active:scale-95 transition-transform cursor-pointer">
-                            ${r.isBest ? '<div class="absolute top-0 right-0 bg-yellow-400 text-white text-xs px-2 py-1 rounded-bl-xl rounded-tr-xl shadow-sm"><i class="fa-solid fa-star"></i> ดีที่สุด</div>' : ''}
-                            
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-bold text-lg text-slate-800">${r.name}</h3>
-                                    <span class="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">CODE: ${r.id}</span>
+                    root.innerHTML = `
+                        <h2 class="text-xl font-bold mb-4 px-2 border-l-4 border-orange-500 fade-in">สูตรของฉัน (${recipes.length})</h2>
+                        <div class="grid gap-4 pb-20 fade-in">
+                            ${recipes.map(r => {
+                                const totalCost = r.ingredients.reduce((s,i) => s + (parseFloat(i.price)||0), 0);
+                                return `
+                                <div onclick="app.viewRecipe('${r.id}')" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 relative active:scale-95 transition-transform">
+                                    ${r.isBest ? '<div class="absolute top-0 right-0 bg-yellow-400 text-white text-[10px] px-2 py-1 rounded-bl-lg rounded-tr-lg shadow"><i class="fa-solid fa-star"></i> เมนูเด็ด</div>' : ''}
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-2xl">
+                                            ${r.name[0]}
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-slate-800 line-clamp-1">${r.name}</h3>
+                                            <div class="flex gap-2 text-xs text-slate-400 mt-1">
+                                                <span><i class="fa-solid fa-eye"></i> ${r.views?.length||0}</span>
+                                                <span class="text-green-600 font-bold bg-green-50 px-1 rounded">ทุน ${totalCost.toLocaleString()}.-</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="mt-4 flex items-center justify-between text-sm">
-                                <div class="flex gap-3 text-slate-500">
-                                    <span><i class="fa-regular fa-eye"></i> ${r.views?.length||0}</span>
-                                    <span><i class="fa-solid fa-heart text-pink-400"></i> ${r.likes?.length||0}</span>
-                                </div>
-                                <div class="font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg border border-green-100">
-                                    ทุน ${totalCost.toLocaleString()}.-
-                                </div>
-                            </div>
+                            `}).join('')}
                         </div>
-                    `}).join('');
+                    `;
                 } catch(e) { console.error(e); }
             },
 
-            // --- Page 2: Search ---
+            // --- Search Page ---
             renderSearch: () => {
                 document.getElementById('app-root').innerHTML = `
-                    <div class="fade-in pt-10 text-center">
-                        <h2 class="text-2xl font-bold mb-6">ค้นหาสูตรคนอื่น</h2>
-                        <div class="bg-white p-6 rounded-3xl shadow-lg border border-slate-100 max-w-sm mx-auto">
-                            <i class="fa-solid fa-globe text-4xl text-blue-500 mb-4"></i>
-                            <p class="text-slate-500 mb-4 text-sm">กรอกรหัสสูตร (CODE) เพื่อดูต้นทุนและวิธีทำ</p>
-                            <div class="join w-full">
-                                <input id="search-code" class="input input-bordered join-item w-full text-center uppercase font-bold tracking-wider" placeholder="ABCD1" />
-                                <button onclick="app.doSearch()" class="btn bg-slate-800 text-white join-item">ค้นหา</button>
+                    <div class="pt-10 fade-in flex flex-col items-center">
+                        <div class="bg-white p-8 rounded-[2rem] shadow-xl w-full max-w-sm text-center border border-slate-100">
+                            <i class="fa-solid fa-magnifying-glass text-4xl text-orange-400 mb-4"></i>
+                            <h2 class="text-xl font-bold mb-2">ค้นหาสูตร</h2>
+                            <p class="text-slate-400 text-sm mb-6">กรอกรหัสสูตร (CODE) เพื่อดูข้อมูล</p>
+                            
+                            <div class="join w-full shadow-inner rounded-full p-1 bg-slate-50">
+                                <input id="search-code" class="input input-ghost join-item w-full text-center uppercase font-bold text-lg" placeholder="CODE" />
+                                <button onclick="app.doSearch()" class="btn bg-slate-800 text-white rounded-full join-item px-6">ค้นหา</button>
                             </div>
                         </div>
                     </div>
                 `;
             },
-            
             doSearch: () => {
                 const code = document.getElementById('search-code').value.trim();
                 if(code) app.viewRecipe(code.toUpperCase());
             },
 
-            // --- Page 3: Detail View (Full & Clear) ---
+            // --- Detail View (แบบแน่น ข้อมูลครบ แต่ดูง่าย) ---
             viewRecipe: async (id) => {
                 const root = document.getElementById('app-root');
                 root.innerHTML = `<div class="text-center pt-20"><span class="loading loading-spinner text-orange-500"></span></div>`;
@@ -286,117 +325,75 @@
                 try {
                     const snap = await getDoc(doc(db, "recipes", id));
                     if(!snap.exists()) return Swal.fire('ไม่พบข้อมูล', '', 'error').then(() => app.navTo('home'));
-                    
                     const d = snap.data();
-                    const isOwner = d.ownerId === state.user.uid;
-                    
-                    // Increment View
-                    if(!isOwner) updateDoc(doc(db, "recipes", id), { views: arrayUnion({uid: state.user.uid, time: new Date().toISOString()}) });
+                    const isOwner = d.ownerId === state.user?.uid;
+                    const totalCost = d.ingredients.reduce((s,i) => s + (parseFloat(i.price)||0), 0);
 
-                    // Calc Costs
-                    const totalCost = d.ingredients.reduce((s, i) => s + (parseFloat(i.price)||0), 0);
-                    const suggestedPrice = Math.ceil(totalCost * 2.5 / 5) * 5; // สูตรคูณ 2.5 ปัดเศษลงท้าย 5
+                    if(!isOwner && state.user) updateDoc(doc(db, "recipes", id), { views: arrayUnion({uid: state.user.uid, time: new Date().toISOString()}) });
 
-                    // HTML Render
                     root.innerHTML = `
-                        <div class="fade-in pb-24">
-                            <button onclick="app.navTo('home')" class="btn btn-sm btn-ghost mb-2 text-slate-400"><i class="fa-solid fa-chevron-left"></i> กลับ</button>
+                        <div class="fade-in">
+                            <button onclick="app.navTo('home')" class="btn btn-sm btn-ghost mb-4 pl-0 text-slate-500"><i class="fa-solid fa-arrow-left"></i> กลับ</button>
                             
-                            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 mb-4 relative overflow-hidden">
-                                <div class="flex justify-between items-start z-10 relative">
-                                    <h1 class="text-2xl font-bold text-slate-800 w-3/4">${d.name}</h1>
-                                    ${isOwner ? `
-                                        <button onclick="app.toggleBest('${id}', ${!d.isBest})" class="btn btn-circle btn-sm ${d.isBest ? 'btn-warning text-white' : 'btn-ghost text-slate-300'}">
-                                            <i class="fa-solid fa-star"></i>
-                                        </button>
-                                    ` : ''}
+                            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 relative mb-4 overflow-hidden">
+                                <div class="absolute right-0 top-0 p-4 opacity-5 pointer-events-none"><i class="fa-solid fa-utensils text-8xl"></i></div>
+                                <div class="flex justify-between items-start relative z-10">
+                                    <h1 class="text-2xl font-bold text-slate-800 w-3/4 leading-tight">${d.name}</h1>
+                                    ${isOwner ? `<button onclick="app.toggleBest('${id}', ${!d.isBest})" class="btn btn-circle btn-sm ${d.isBest ? 'btn-warning text-white' : 'btn-ghost text-slate-300'}"><i class="fa-solid fa-star"></i></button>` : ''}
                                 </div>
-                                <p class="text-xs text-slate-500 mt-1">โดย ${d.ownerName}</p>
-                            </div>
-
-                            <div class="bg-slate-800 text-white p-5 rounded-3xl shadow-lg mb-4 relative overflow-hidden">
-                                <div class="absolute right-0 top-0 p-4 opacity-10"><i class="fa-solid fa-calculator text-6xl"></i></div>
-                                <h3 class="text-sm opacity-80 mb-2">สรุปต้นทุน (Cost Analysis)</h3>
-                                <div class="flex justify-between items-end mb-2">
-                                    <span class="text-3xl font-bold text-green-400">${totalCost.toLocaleString()} ฿</span>
-                                    <span class="text-xs opacity-70">ต่อสูตร</span>
-                                </div>
-                                <div class="divider my-1 before:bg-slate-600 after:bg-slate-600"></div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="opacity-70">ราคาขายแนะนำ (x2.5)</span>
-                                    <span class="font-bold text-yellow-400">~${suggestedPrice} ฿</span>
+                                <div class="mt-3 flex gap-2">
+                                    <span class="badge badge-neutral">CODE: ${id}</span>
+                                    <span class="badge badge-outline text-slate-500">โดย ${d.ownerName}</span>
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-4">
-                                <div class="bg-orange-50 px-4 py-2 border-b border-orange-100 font-bold text-orange-700 text-sm">
-                                    <i class="fa-solid fa-list"></i> รายการวัตถุดิบ & ราคา
+                            <div class="bg-slate-800 text-white rounded-3xl p-5 shadow-lg mb-6 flex justify-between items-center">
+                                <div>
+                                    <div class="text-xs text-slate-400 uppercase tracking-wide">ต้นทุนรวม (Cost)</div>
+                                    <div class="text-3xl font-bold text-green-400">${totalCost.toLocaleString()} ฿</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-xs text-slate-400">แนะนำขาย</div>
+                                    <div class="text-xl font-bold text-yellow-400">~${Math.ceil(totalCost * 2.5)} ฿</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
+                                <div class="bg-orange-50 px-4 py-2 border-b border-orange-100 font-bold text-orange-700 text-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-basket-shopping"></i> รายการวัตถุดิบ
                                 </div>
                                 <table class="table table-sm w-full text-sm">
-                                    <thead><tr class="text-slate-400 font-normal"><th>รายการ</th><th class="text-right">จำนวน</th><th class="text-right">ทุน(฿)</th></tr></thead>
+                                    <thead><tr class="text-slate-400 font-light"><th>รายการ</th><th class="text-right">จำนวน</th><th class="text-right">ราคา</th></tr></thead>
                                     <tbody>
                                         ${d.ingredients.map(i => `
                                             <tr class="border-slate-50">
-                                                <td class="font-medium">${i.name}</td>
-                                                <td class="text-right opacity-70">${i.qty}</td>
-                                                <td class="text-right font-bold text-slate-600">${i.price || '-'}</td>
-                                            </tr>
-                                        `).join('')}
+                                                <td class="font-medium text-slate-700">${i.name}</td>
+                                                <td class="text-right text-slate-500">${i.qty}</td>
+                                                <td class="text-right font-bold text-slate-600">${i.price}</td>
+                                            </tr>`).join('')}
                                     </tbody>
                                 </table>
                             </div>
 
-                            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-                                <h3 class="font-bold text-blue-600 mb-3 text-sm"><i class="fa-solid fa-fire-burner"></i> วิธีทำ</h3>
+                            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-8">
+                                <h3 class="font-bold text-blue-600 mb-4 text-sm"><i class="fa-solid fa-list-check"></i> วิธีทำ</h3>
                                 <div class="space-y-4">
                                     ${d.steps_list.map((s, idx) => `
                                         <div class="flex gap-3">
-                                            <div class="flex-none w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mt-0.5">${idx+1}</div>
-                                            <p class="text-slate-700 text-sm leading-relaxed font-light">${s}</p>
+                                            <div class="flex-none w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mt-1 shadow-sm">${idx+1}</div>
+                                            <p class="text-slate-700 text-sm leading-relaxed">${s}</p>
                                         </div>
                                     `).join('')}
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4 mt-6">
-                                <button onclick="app.toggleLike('${id}')" class="btn bg-white border-slate-200 text-pink-500 hover:bg-pink-50">
-                                    <i class="${d.likes?.includes(state.user.uid) ? 'fa-solid' : 'fa-regular'} fa-heart"></i> ถูกใจ (${d.likes?.length||0})
-                                </button>
-                                ${isOwner ? `<button onclick="app.deleteRecipe('${id}')" class="btn bg-red-50 border-red-100 text-red-500 hover:bg-red-100">ลบสูตร</button>` : ''}
-                            </div>
+                            ${isOwner ? `<button onclick="app.deleteRecipe('${id}')" class="btn btn-outline btn-error btn-sm w-full rounded-xl"><i class="fa-solid fa-trash"></i> ลบสูตรนี้</button>` : ''}
                         </div>
                     `;
                 } catch(e) { console.error(e); }
             },
 
-            // --- Page 4: Profile ---
-            renderProfile: () => {
-                const u = state.user;
-                document.getElementById('app-root').innerHTML = `
-                    <div class="fade-in pt-10 px-4">
-                        <div class="text-center mb-8">
-                            <div class="w-24 h-24 rounded-full bg-slate-200 mx-auto mb-4 overflow-hidden border-4 border-white shadow-md">
-                                <img src="https://ui-avatars.com/api/?name=${u.displayName}&size=200&background=random" />
-                            </div>
-                            <h2 class="text-2xl font-bold">${u.displayName}</h2>
-                            <p class="text-slate-400 text-sm">${u.email}</p>
-                        </div>
-                        
-                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                            <div onclick="Swal.fire('Coming Soon', 'ฟีเจอร์นี้กำลังมา', 'info')" class="p-4 border-b border-slate-50 flex justify-between items-center cursor-pointer hover:bg-slate-50">
-                                <span class="text-slate-600"><i class="fa-solid fa-chart-pie mr-2 text-blue-500"></i> สรุปต้นทุนรวมทุกสูตร</span>
-                                <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
-                            </div>
-                            <div onclick="app.logout()" class="p-4 flex justify-between items-center cursor-pointer hover:bg-red-50 text-red-500">
-                                <span><i class="fa-solid fa-power-off mr-2"></i> ออกจากระบบ</span>
-                            </div>
-                        </div>
-                        <p class="text-center mt-10 text-xs text-slate-300">Aysoot V.Pro Costing</p>
-                    </div>
-                `;
-            },
-
-            // --- Recipe Functions (CRUD) ---
+            // --- Modal Functions (Create) ---
             openCreateModal: () => {
                 document.getElementById('recipe-name').value = '';
                 document.getElementById('ing-list').innerHTML = '';
@@ -410,11 +407,9 @@
                 const div = document.createElement('div');
                 div.className = "grid grid-cols-12 gap-2 mb-2 animate-fade-in";
                 div.innerHTML = `
-                    <div class="col-span-6"><input type="text" class="ing-name input input-sm input-bordered w-full rounded-lg" placeholder="ชื่อ"></div>
-                    <div class="col-span-3"><input type="text" class="ing-qty input input-sm input-bordered w-full text-center rounded-lg" placeholder="ปริมาณ"></div>
-                    <div class="col-span-3 relative">
-                        <input type="number" oninput="app.calcTotalCost()" class="ing-price input input-sm input-bordered w-full text-right rounded-lg pr-1" placeholder="0">
-                    </div>
+                    <div class="col-span-6"><input type="text" class="ing-name input input-sm input-bordered w-full rounded-lg bg-slate-50" placeholder="ชื่อ"></div>
+                    <div class="col-span-3"><input type="text" class="ing-qty input input-sm input-bordered w-full text-center rounded-lg bg-slate-50" placeholder="จำนวน"></div>
+                    <div class="col-span-3"><input type="number" oninput="app.calcTotalCost()" class="ing-price input input-sm input-bordered w-full text-right rounded-lg bg-slate-50" placeholder="0"></div>
                 `;
                 document.getElementById('ing-list').appendChild(div);
             },
@@ -422,25 +417,40 @@
             addStep: () => {
                 const list = document.getElementById('step-list');
                 const div = document.createElement('div');
-                div.className = "flex gap-2 items-start";
+                div.className = "flex gap-2 items-start animate-fade-in";
                 div.innerHTML = `
-                    <div class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs flex items-center justify-center mt-1 font-bold step-num"></div>
-                    <textarea class="step-desc textarea textarea-bordered w-full text-sm leading-snug rounded-xl" rows="2" placeholder="รายละเอียดขั้นตอน..."></textarea>
-                    <button onclick="this.parentElement.remove(); app.reindexSteps();" class="btn btn-xs btn-square btn-ghost text-red-300 mt-1"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 text-xs flex items-center justify-center mt-1 font-bold step-num"></div>
+                    <textarea class="step-desc textarea textarea-bordered w-full text-sm leading-snug rounded-xl bg-slate-50 h-20" placeholder="รายละเอียด..."></textarea>
+                    <button onclick="this.parentElement.remove(); app.reindexSteps();" class="btn btn-xs btn-circle btn-ghost text-red-300 mt-2"><i class="fa-solid fa-times"></i></button>
                 `;
                 list.appendChild(div);
                 app.reindexSteps();
             },
 
-            reindexSteps: () => {
-                document.querySelectorAll('.step-num').forEach((el, i) => el.innerText = i+1);
-            },
+            reindexSteps: () => document.querySelectorAll('.step-num').forEach((el, i) => el.innerText = i+1),
 
             calcTotalCost: () => {
                 let total = 0;
                 document.querySelectorAll('.ing-price').forEach(el => total += parseFloat(el.value) || 0);
                 document.getElementById('total-cost-display').innerText = total.toLocaleString() + ' ฿';
                 return total;
+            },
+
+            // --- Save Logic with Explicit Popup ---
+            confirmSave: () => {
+                 Swal.fire({
+                    title: 'บันทึกสูตร?',
+                    text: "ตรวจสอบข้อมูลให้ถูกต้องนะ",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-check"></i> ยืนยัน',
+                    cancelButtonText: 'แก้ไขก่อน',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        app.saveRecipe();
+                    }
+                });
             },
 
             saveRecipe: async () => {
@@ -455,10 +465,10 @@
                 const steps = [];
                 document.querySelectorAll('.step-desc').forEach(el => { if(el.value) steps.push(el.value) });
 
-                if(!name || ings.length === 0) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาใส่ชื่อและวัตถุดิบ', 'warning');
+                if(!name || ings.length === 0) return Swal.fire('ข้อมูลไม่ครบ', 'ใส่ชื่อและวัตถุดิบอย่างน้อย 1 อย่าง', 'warning');
 
                 try {
-                    Swal.showLoading();
+                    Swal.fire({title:'กำลังบันทึก...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
                     const code = Math.random().toString(36).substring(2, 7).toUpperCase();
                     await setDoc(doc(db, "recipes", code), {
                         name, ingredients: ings, steps_list: steps,
@@ -466,42 +476,30 @@
                         createdAt: serverTimestamp(), isBest: false, views: [], likes: []
                     });
                     document.getElementById('modal_create').close();
-                    Swal.fire({icon:'success', title: 'บันทึกแล้ว', text: `ต้นทุนรวม: ${app.calcTotalCost()} บาท`});
+                    Swal.fire('สำเร็จ!', `บันทึกเรียบร้อย รหัส: ${code}`, 'success');
                     app.navTo('home');
                 } catch(e) { Swal.fire('Error', e.message, 'error'); }
             },
 
-            toggleBest: async (id, status) => {
-                await updateDoc(doc(db, "recipes", id), { isBest: status });
-                app.viewRecipe(id); // Reload
-            },
-            
+             // --- Auth & Helper ---
             deleteRecipe: (id) => {
-                Swal.fire({title:'ยืนยันลบ?', icon:'warning', showCancelButton:true}).then(async r => {
+                Swal.fire({title:'ลบจริงนะ?', text:'กู้คืนไม่ได้ครับ', icon:'warning', showCancelButton:true, confirmButtonText:'ลบเลย', confirmButtonColor:'#ef4444'}).then(async r=>{
                     if(r.isConfirmed) { await deleteDoc(doc(db, "recipes", id)); app.navTo('home'); }
                 });
             },
-
-            toggleLike: async (id) => {
-                const ref = doc(db, "recipes", id);
-                const uid = state.user.uid;
-                const snap = await getDoc(ref);
-                const likes = snap.data().likes || [];
-                if(likes.includes(uid)) await updateDoc(ref, { likes: arrayRemove(uid) });
-                else await updateDoc(ref, { likes: arrayUnion(uid) });
+            toggleBest: async (id, status) => {
+                await updateDoc(doc(db, "recipes", id), { isBest: status });
                 app.viewRecipe(id);
             },
-
-            // --- Auth ---
             renderLogin: () => {
                 document.getElementById('app-root').innerHTML = `
-                    <div class="flex flex-col items-center justify-center pt-32 text-center px-6">
-                        <div class="w-20 h-20 bg-orange-500 rounded-3xl flex items-center justify-center text-white text-4xl shadow-xl mb-6 rotate-3">
+                    <div class="flex flex-col items-center justify-center pt-24 fade-in">
+                        <div class="w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center text-4xl text-orange-500 mb-6">
                             <i class="fa-solid fa-utensils"></i>
                         </div>
-                        <h1 class="text-3xl font-bold text-slate-800 mb-2">Aysoot Pro</h1>
-                        <p class="text-slate-500 mb-8">ระบบจัดการสูตรและต้นทุนร้านอาหาร</p>
-                        <button onclick="app.openAuth('login')" class="btn bg-slate-800 text-white w-full max-w-xs rounded-full shadow-lg">เข้าสู่ระบบ / สมัครสมาชิก</button>
+                        <h1 class="text-2xl font-bold text-slate-700">ยินดีต้อนรับสู่ Aysoot</h1>
+                        <p class="text-slate-400 text-sm mb-8">จดสูตร คำนวณต้นทุน แบ่งปันความอร่อย</p>
+                        <button onclick="app.openAuth('login')" class="btn bg-slate-800 text-white rounded-full px-8 shadow-lg">เข้าสู่ระบบ</button>
                     </div>
                 `;
             },
@@ -520,7 +518,7 @@
             logout: () => signOut(auth)
         };
 
-        // Bind Form
+        // Bind Submit
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('inp-email').value;
