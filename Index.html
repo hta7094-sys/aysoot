@@ -1,93 +1,129 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="cupcake">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aysoot - บันทึกสูตร เเมะลี่</title>
+    <title>Aysoot - คลังสูตรลับ เเบบไม่อร่อย</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.6.0/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Kanit', 'sans-serif'] },
-                    colors: {
-                        chef: { 50: '#fff7ed', 100: '#ffedd5', 500: '#f97316', 600: '#ea580c', 900: '#7c2d12' }
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         body {
-            background-image: url('https://images.unsplash.com/photo-1495195134817-aeb325a55b65?q=80&w=2076&auto=format&fit=crop');
+            font-family: 'Kanit', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=2070&auto=format&fit=crop');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
+        .glass-box {
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         }
-        .fade-enter { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #f97316; border-radius: 4px; }
+        .slide-up { animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="min-h-screen text-gray-800 antialiased">
+<body class="min-h-screen">
 
-    <nav class="glass-panel sticky top-0 z-50 px-6 py-4 mb-8">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="app.renderHome()">
-                <div class="bg-chef-500 text-white w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg">
-                    <i class="fas fa-utensils"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-chef-600 tracking-tight">Aysoot</h1>
+    <div class="navbar glass-box sticky top-0 z-50 px-4 md:px-8 text-slate-800">
+        <div class="flex-1">
+            <a onclick="app.showHome()" class="btn btn-ghost text-2xl font-bold text-orange-600 gap-2">
+                <i class="fa-solid fa-cookie-bite"></i> Aysoot
+            </a>
+        </div>
+        <div class="flex-none gap-2">
+            <div id="guest-menu" class="hidden">
+                <button onclick="app.toggleAuthModal('login')" class="btn btn-ghost">เข้าสู่ระบบ</button>
+                <button onclick="app.toggleAuthModal('register')" class="btn btn-primary text-white rounded-full px-6">สมัครสมาชิก</button>
             </div>
-            
-            <div id="nav-menu" class="hidden md:flex gap-6 items-center font-medium">
-                <button onclick="app.renderHome()" class="hover:text-chef-600 transition">หน้าแรก</button>
-                <button onclick="app.renderCompare()" class="hover:text-chef-600 transition">เปรียบเทียบสูตร</button>
-                <div id="auth-buttons">
+            <div id="user-menu" class="hidden flex items-center gap-4">
+                <div class="hidden md:block text-sm font-semibold text-orange-800" id="user-email-display"></div>
+                <button onclick="app.showCreateModal()" class="btn btn-warning text-white btn-sm md:btn-md gap-2 rounded-full shadow-lg hover:scale-105 transition">
+                    <i class="fa-solid fa-plus"></i> สร้างสูตรใหม่
+                </button>
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar bg-orange-200">
+                        <div class="w-10 rounded-full flex items-center justify-center pt-2 text-xl text-orange-600">
+                            <i class="fa-solid fa-user-chef"></i>
+                        </div>
                     </div>
+                    <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                        <li><a onclick="app.showMyRecipes()">สูตรของฉัน</a></li>
+                        <li><a onclick="app.logout()" class="text-error">ออกจากระบบ</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <main id="app-container" class="container mx-auto px-4 pb-20 fade-enter max-w-5xl">
+    <main id="main-container" class="container mx-auto p-4 pb-20 max-w-6xl">
         </main>
 
-    <datalist id="globalIngredients">
-        <option value="เกลือสมุทร">
-        <option value="เกลือหิมาลัย">
-        <option value="น้ำตาลมะพร้าว">
-        <option value="น้ำตาลทรายแดง">
-        <option value="แป้งสาลีอเนกประสงค์">
-        <option value="แป้งเค้ก">
-        <option value="เนยจืด (Unsalted Butter)">
-        <option value="เนยเค็ม (Salted Butter)">
-        <option value="วิปปิ้งครีม">
-        <option value="น้ำปลาแท้">
-        <option value="ซอสหอยนางรม">
-        <option value="พริกไทยดำป่น">
-        <option value="ออริกาโน่">
-        <option value="โรสแมรี่">
-        <option value="ชีสมอสซาเรลล่า">
-    </datalist>
+    <dialog id="auth_modal" class="modal">
+        <div class="modal-box glass-box relative">
+            <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+            <h3 class="font-bold text-2xl text-center text-orange-600 mb-6" id="auth-title">เข้าสู่ระบบ</h3>
+            <form id="auth-form" class="space-y-4">
+                <label class="input input-bordered flex items-center gap-2">
+                    <i class="fa-solid fa-envelope text-gray-400"></i>
+                    <input type="email" id="auth-email" class="grow" placeholder="อีเมล" required />
+                </label>
+                <label class="input input-bordered flex items-center gap-2">
+                    <i class="fa-solid fa-key text-gray-400"></i>
+                    <input type="password" id="auth-pass" class="grow" placeholder="รหัสผ่าน" required />
+                </label>
+                <button type="submit" class="btn btn-primary w-full text-white text-lg mt-4 shadow-orange-300 shadow-lg">ยืนยัน</button>
+            </form>
+            <p class="text-center mt-4 text-sm cursor-pointer hover:underline text-gray-500" id="auth-switch" onclick="app.switchAuthMode()">ยังไม่มีบัญชี? สมัครสมาชิก</p>
+        </div>
+    </dialog>
+
+    <dialog id="create_modal" class="modal">
+        <div class="modal-box w-11/12 max-w-4xl glass-box">
+            <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+            <h3 class="font-bold text-2xl text-orange-600 mb-4"><i class="fa-solid fa-book-open"></i> บันทึกสูตรใหม่</h3>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">ชื่อเมนู</span></label>
+                        <input type="text" id="recipe-name" placeholder="เช่น แกงเขียวหวาน, เค้กส้ม" class="input input-bordered w-full focus:input-warning" />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-bold">วิธีทำ / คำอธิบาย</span></label>
+                        <textarea id="recipe-desc" class="textarea textarea-bordered h-40 focus:textarea-warning" placeholder="ขั้นตอนการทำ..."></textarea>
+                    </div>
+                </div>
+
+                <div class="bg-orange-50/50 p-4 rounded-xl border border-orange-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-bold text-orange-800">วัตถุดิบ & เครื่องปรุง</span>
+                        <button onclick="app.addIngredientRow()" class="btn btn-xs btn-outline btn-warning">+ เพิ่มรายการ</button>
+                    </div>
+                    <div id="ingredient-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scroll">
+                        </div>
+                </div>
+            </div>
+
+            <div class="modal-action">
+                <button onclick="app.saveRecipe()" class="btn btn-primary text-white w-full md:w-auto px-8"><i class="fa-solid fa-save"></i> บันทึกสูตร & รับรหัสลับ</button>
+            </div>
+        </div>
+    </dialog>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Your Config
         const firebaseConfig = {
             apiKey: "AIzaSyDVS3zsJSeqOs5Wwpkj-DNbN1vhfc2_3LE",
             authDomain: "aysoot.firebaseapp.com",
@@ -102,294 +138,302 @@
         const auth = getAuth(fbApp);
         const db = getFirestore(fbApp);
 
-        // --- State Management ---
-        const state = {
-            user: null,
-            currentView: 'home'
-        };
-
-        // --- UI Renders ---
-        const ui = {
-            login: () => `
-                <div class="max-w-md mx-auto glass-panel p-8 rounded-2xl text-center">
-                    <h2 class="text-3xl font-bold text-chef-600 mb-2">ยินดีต้อนรับ</h2>
-                    <p class="text-gray-500 mb-6">เข้าสู่ระบบเพื่อบันทึกสูตรลับของคุณ</p>
-                    <form onsubmit="app.handleAuth(event, 'login')" class="space-y-4">
-                        <input type="email" name="email" placeholder="อีเมล" class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-chef-500 outline-none bg-white/50" required>
-                        <input type="password" name="password" placeholder="รหัสผ่าน" class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-chef-500 outline-none bg-white/50" required>
-                        <button class="w-full bg-gradient-to-r from-chef-500 to-chef-600 text-white py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">เข้าสู่ระบบ</button>
-                    </form>
-                    <p class="mt-4 text-sm">ยังไม่มีบัญชี? <button onclick="app.renderRegister()" class="text-chef-600 font-bold hover:underline">สมัครสมาชิก</button></p>
-                </div>
-            `,
-            register: () => `
-                <div class="max-w-md mx-auto glass-panel p-8 rounded-2xl text-center">
-                    <h2 class="text-3xl font-bold text-chef-600 mb-2">สมัครสมาชิก</h2>
-                    <p class="text-gray-500 mb-6">สร้างบัญชีเพื่อเริ่มเป็นเชฟ</p>
-                    <form onsubmit="app.handleAuth(event, 'register')" class="space-y-4">
-                        <input type="email" name="email" placeholder="อีเมล" class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-chef-500 outline-none bg-white/50" required>
-                        <input type="password" name="password" placeholder="รหัสผ่าน (6 ตัวขึ้นไป)" class="w-full p-3 rounded-lg border focus:ring-2 focus:ring-chef-500 outline-none bg-white/50" required>
-                        <button class="w-full bg-chef-600 text-white py-3 rounded-lg font-bold shadow-lg">สมัครสมาชิก</button>
-                    </form>
-                    <p class="mt-4 text-sm">มีบัญชีแล้ว? <button onclick="app.renderLogin()" class="text-chef-600 font-bold hover:underline">เข้าสู่ระบบ</button></p>
-                </div>
-            `,
-            dashboard: (recipes) => `
-                <div class="grid lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-1">
-                        <div class="glass-panel p-6 rounded-2xl sticky top-24">
-                            <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-chef-500"></i> สร้างสูตรใหม่</h3>
-                            <div class="space-y-3">
-                                <input id="newRecipeName" type="text" placeholder="ชื่อเมนูอาหาร/ขนม" class="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-chef-500 outline-none">
-                                <textarea id="newRecipeDesc" rows="3" placeholder="คำบรรยายสั้นๆ หรือ วิธีทำ" class="w-full p-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-chef-500 outline-none"></textarea>
-                                
-                                <div class="bg-orange-50 p-3 rounded-lg border border-orange-100">
-                                    <label class="text-xs font-bold text-gray-500 uppercase">ส่วนผสม</label>
-                                    <div id="ingredient-inputs" class="space-y-2 mt-2"></div>
-                                    <button onclick="app.addIngredientRow()" class="mt-2 text-xs bg-white border border-gray-300 px-2 py-1 rounded hover:bg-gray-50">+ เพิ่มส่วนผสม</button>
-                                </div>
-
-                                <button onclick="app.saveRecipe()" class="w-full bg-chef-600 hover:bg-chef-900 text-white py-3 rounded-lg font-bold shadow transition">บันทึกสูตร</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="flex justify-between items-end">
-                            <h2 class="text-3xl font-bold text-gray-800">สูตรของฉัน</h2>
-                            <span class="text-sm text-gray-500">ทั้งหมด ${recipes.length} สูตร</span>
-                        </div>
-                        ${recipes.length === 0 ? '<div class="text-center py-10 text-gray-400 glass-panel rounded-xl">ยังไม่มีสูตร เริ่มสร้างเลย!</div>' : ''}
-                        ${recipes.map(r => ui.recipeCard(r, true)).join('')}
-                    </div>
-                </div>
-            `,
-            homeGuest: () => `
-                <div class="text-center py-16">
-                    <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">ค้นพบรสชาติที่ใช่</h1>
-                    <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-md">แหล่งรวมสูตรอาหารและขนมจากทั่วโลก บันทึกสูตรลับของคุณและแบ่งปันผ่านรหัสลับ</p>
+        // --- Templates ---
+        const templates = {
+            home: () => `
+                <div class="text-center py-20 slide-up">
+                    <h1 class="text-5xl md:text-7xl font-bold text-white drop-shadow-md mb-6">Aysoot Recipe</h1>
+                    <p class="text-xl text-white/90 mb-10 font-light">พื้นที่ของคนรักการทำอาหาร จดบันทึกสูตรลับ และแบ่งปันด้วยรหัส</p>
                     
-                    <div class="max-w-xl mx-auto glass-panel p-2 rounded-full flex shadow-2xl transform hover:scale-105 transition duration-300">
-                        <input id="guestSearchCode" type="text" placeholder="กรอกรหัสสูตร (เช่น EYR590)" class="flex-1 bg-transparent p-4 outline-none text-lg font-medium placeholder-gray-400">
-                        <button onclick="app.searchRecipeGuest()" class="bg-chef-500 hover:bg-chef-600 text-white px-8 rounded-full font-bold text-lg transition">ค้นหา</button>
+                    <div class="glass-box max-w-2xl mx-auto p-4 rounded-full flex shadow-2xl transform hover:scale-[1.02] transition">
+                        <input id="search-code" type="text" placeholder="กรอกรหัสสูตร (เช่น X9K2P)" class="flex-1 bg-transparent px-6 text-xl outline-none placeholder-gray-500 font-bold uppercase text-slate-700">
+                        <button onclick="app.searchRecipe()" class="btn btn-primary rounded-full px-8 text-white text-lg">ค้นหา</button>
                     </div>
-                </div>
-                <div id="guest-result" class="mt-8 max-w-2xl mx-auto"></div>
-            `,
-            compare: () => `
-                <div class="glass-panel p-8 rounded-2xl min-h-[600px]">
-                    <h2 class="text-3xl font-bold text-center mb-8 text-chef-600"><i class="fas fa-balance-scale"></i> เปรียบเทียบสูตร</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
-                        <div class="flex flex-col h-full">
-                            <div class="flex gap-2 mb-4">
-                                <input id="codeA" type="text" placeholder="รหัสสูตรที่ 1" class="flex-1 p-3 rounded-lg border shadow-inner">
-                                <button onclick="app.fetchForCompare('codeA', 'resA')" class="bg-blue-500 text-white px-4 rounded-lg"><i class="fas fa-search"></i></button>
-                            </div>
-                            <div id="resA" class="flex-1 bg-white/50 rounded-xl p-4 border border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-                                รอข้อมูล...
-                            </div>
-                        </div>
-                        <div class="flex flex-col h-full">
-                            <div class="flex gap-2 mb-4">
-                                <input id="codeB" type="text" placeholder="รหัสสูตรที่ 2" class="flex-1 p-3 rounded-lg border shadow-inner">
-                                <button onclick="app.fetchForCompare('codeB', 'resB')" class="bg-red-500 text-white px-4 rounded-lg"><i class="fas fa-search"></i></button>
-                            </div>
-                            <div id="resB" class="flex-1 bg-white/50 rounded-xl p-4 border border-dashed border-gray-300 flex items-center justify-center text-gray-400">
-                                รอข้อมูล...
-                            </div>
-                        </div>
-                    </div>
+
+                    <div id="search-result" class="mt-12 max-w-4xl mx-auto text-left"></div>
                 </div>
             `,
             recipeCard: (data, isOwner) => `
-                <div class="glass-panel p-6 rounded-xl hover:shadow-2xl transition duration-300 relative group">
+                <div class="glass-box rounded-2xl p-6 mb-6 relative hover:shadow-xl transition border-l-8 border-orange-400 slide-up">
                     <div class="flex justify-between items-start">
                         <div>
-                            <span class="bg-chef-100 text-chef-600 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">CODE: ${data.id}</span>
-                            <h3 class="text-2xl font-bold text-gray-800">${data.name}</h3>
-                            <p class="text-gray-500 text-sm mt-1 line-clamp-2">${data.steps}</p>
+                            <div class="badge badge-warning text-white font-bold p-3 mb-2 text-lg tracking-widest cursor-pointer" onclick="app.copyCode('${data.id}')" title="คลิกเพื่อคัดลอก">
+                                <i class="fa-solid fa-key mr-2"></i> ${data.id}
+                            </div>
+                            <h2 class="text-3xl font-bold text-slate-800">${data.name}</h2>
+                            <p class="text-sm text-gray-500 mt-1">โดย: ${data.ownerEmail.split('@')[0]}</p>
                         </div>
-                        ${isOwner ? `<button onclick="app.deleteRecipe('${data.id}')" class="text-red-300 hover:text-red-500"><i class="fas fa-trash"></i></button>` : ''}
+                        ${isOwner ? `
+                        <div class="dropdown dropdown-end">
+                            <div tabindex="0" role="button" class="btn btn-ghost btn-circle text-gray-500"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+                            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                <li><a onclick="app.deleteRecipe('${data.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i> ลบสูตร</a></li>
+                            </ul>
+                        </div>` : ''}
                     </div>
-                    
-                    <div class="mt-4 border-t border-gray-200 pt-4">
-                        <h4 class="font-bold text-sm text-gray-600 mb-2">วัตถุดิบ:</h4>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            ${data.ingredients.map(ing => `
-                                <div class="flex justify-between bg-white/60 px-2 py-1 rounded">
-                                    <span>${ing.name}</span>
-                                    <span class="font-bold text-chef-600">${ing.qty} ${ing.unit}</span>
-                                </div>
-                            `).join('')}
+
+                    <div class="divider"></div>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1 bg-white/50 p-4 rounded-xl">
+                            <h3 class="font-bold text-lg text-orange-700 mb-3"><i class="fa-solid fa-basket-shopping"></i> วัตถุดิบ</h3>
+                            <ul class="space-y-2 text-sm">
+                                ${data.ingredients.map(ing => `
+                                    <li class="flex justify-between border-b border-gray-200 pb-1">
+                                        <span>${ing.name}</span>
+                                        <span class="font-bold text-orange-600">${ing.qty} ${ing.unit}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <div class="md:col-span-2">
+                            <h3 class="font-bold text-lg text-orange-700 mb-3"><i class="fa-solid fa-fire-burner"></i> วิธีทำ</h3>
+                            <p class="whitespace-pre-line text-slate-700 leading-relaxed">${data.desc || 'ไม่มีรายละเอียด'}</p>
+                        </div>
+                    </div>
+                </div>
+            `,
+            myRecipes: (list) => `
+                <div class="slide-up">
+                    <h2 class="text-3xl font-bold text-white drop-shadow mb-6"><i class="fa-solid fa-book"></i> สมุดจดสูตรของฉัน</h2>
+                    ${list.length === 0 ? 
+                        `<div class="glass-box p-10 rounded-2xl text-center text-gray-500">
+                            <i class="fa-solid fa-circle-plus text-6xl text-orange-300 mb-4"></i><br>ยังไม่มีสูตร<br>กดปุ่ม "สร้างสูตรใหม่" ด้านบนเพื่อเริ่มจด
+                        </div>` 
+                        : list}
+                </div>
+            `,
+            compare: () => `
+                <div class="glass-box rounded-2xl p-8 slide-up">
+                    <h2 class="text-3xl font-bold text-center text-orange-600 mb-8">โหมดเปรียบเทียบสูตร</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div id="compare-a" class="border-r-0 md:border-r border-gray-300 pr-0 md:pr-4">
+                            <input id="code-a" type="text" placeholder="รหัสสูตรที่ 1" class="input input-bordered w-full mb-4">
+                            <button onclick="app.fetchCompare('code-a', 'res-a')" class="btn btn-outline btn-warning w-full">โหลดข้อมูล</button>
+                            <div id="res-a" class="mt-4 min-h-[200px]"></div>
+                        </div>
+                        <div id="compare-b" class="pl-0 md:pl-4">
+                            <input id="code-b" type="text" placeholder="รหัสสูตรที่ 2" class="input input-bordered w-full mb-4">
+                            <button onclick="app.fetchCompare('code-b', 'res-b')" class="btn btn-outline btn-warning w-full">โหลดข้อมูล</button>
+                            <div id="res-b" class="mt-4 min-h-[200px]"></div>
                         </div>
                     </div>
                 </div>
             `
         };
 
-        // --- Application Logic ---
+        // --- App Logic ---
         window.app = {
+            user: null,
+            authMode: 'login',
+
             init: () => {
                 onAuthStateChanged(auth, (user) => {
-                    state.user = user;
-                    app.updateNav();
-                    if(user) app.renderDashboard();
-                    else app.renderHome();
+                    app.user = user;
+                    app.updateUI();
+                    if(user) app.showMyRecipes();
+                    else app.showHome();
                 });
             },
 
-            updateNav: () => {
-                const btnContainer = document.getElementById('auth-buttons');
-                if (state.user) {
-                    btnContainer.innerHTML = `
-                        <span class="text-sm text-chef-900 mr-2">${state.user.email.split('@')[0]}</span>
-                        <button onclick="app.logout()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-full text-sm font-bold transition">ออกจากระบบ</button>
-                    `;
+            updateUI: () => {
+                const guestMenu = document.getElementById('guest-menu');
+                const userMenu = document.getElementById('user-menu');
+                if (app.user) {
+                    guestMenu.classList.add('hidden');
+                    userMenu.classList.remove('hidden');
+                    userMenu.classList.add('flex');
+                    document.getElementById('user-email-display').innerText = `เชฟ: ${app.user.email}`;
                 } else {
-                    btnContainer.innerHTML = `
-                        <button onclick="app.renderLogin()" class="text-chef-600 hover:underline mr-4">เข้าสู่ระบบ</button>
-                        <button onclick="app.renderRegister()" class="bg-chef-500 hover:bg-chef-600 text-white px-5 py-2 rounded-full shadow-lg transition">สมัครสมาชิก</button>
-                    `;
+                    guestMenu.classList.remove('hidden');
+                    userMenu.classList.add('hidden');
+                    userMenu.classList.remove('flex');
                 }
             },
 
-            // Navigation Actions
-            renderHome: () => {
-                document.getElementById('app-container').innerHTML = ui.homeGuest();
+            // Navigation
+            showHome: () => {
+                document.getElementById('main-container').innerHTML = templates.home() + `<div class="mt-10">${templates.compare()}</div>`;
             },
-            renderLogin: () => document.getElementById('app-container').innerHTML = ui.login(),
-            renderRegister: () => document.getElementById('app-container').innerHTML = ui.register(),
-            renderDashboard: async () => {
-                if(!state.user) return app.renderLogin();
-                // Load user recipes
-                const q = query(collection(db, "recipes"), where("ownerId", "==", state.user.uid));
-                const querySnapshot = await getDocs(q);
-                const recipes = [];
-                querySnapshot.forEach((doc) => recipes.push({ id: doc.id, ...doc.data() }));
+            
+            showMyRecipes: async () => {
+                if(!app.user) return;
+                const q = query(collection(db, "recipes"), where("ownerId", "==", app.user.uid));
+                const snapshot = await getDocs(q);
+                const listHtml = snapshot.docs.map(doc => templates.recipeCard({id: doc.id, ...doc.data()}, true)).join('');
+                document.getElementById('main-container').innerHTML = templates.myRecipes(listHtml);
+            },
+
+            // Auth Functions
+            toggleAuthModal: (mode) => {
+                app.authMode = mode;
+                const title = mode === 'login' ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
+                const switchText = mode === 'login' ? 'ยังไม่มีบัญชี? สมัครสมาชิก' : 'มีบัญชีแล้ว? เข้าสู่ระบบ';
                 
-                document.getElementById('app-container').innerHTML = ui.dashboard(recipes);
-                app.addIngredientRow(); // Add first row
-            },
-            renderCompare: () => {
-                document.getElementById('app-container').innerHTML = ui.compare();
+                document.getElementById('auth-title').innerText = title;
+                document.getElementById('auth-switch').innerText = switchText;
+                document.getElementById('auth_modal').showModal();
             },
 
-            // Auth Actions
-            handleAuth: async (e, type) => {
+            switchAuthMode: () => app.toggleAuthModal(app.authMode === 'login' ? 'register' : 'login'),
+
+            handleAuth: async (e) => {
                 e.preventDefault();
-                const email = e.target.email.value;
-                const password = e.target.password.value;
+                const email = document.getElementById('auth-email').value;
+                const pass = document.getElementById('auth-pass').value;
+                const modal = document.getElementById('auth_modal');
+
                 try {
-                    if(type === 'login') await signInWithEmailAndPassword(auth, email, password);
-                    else await createUserWithEmailAndPassword(auth, email, password);
-                } catch (error) {
-                    alert("Error: " + error.message);
+                    if (app.authMode === 'login') {
+                        await signInWithEmailAndPassword(auth, email, pass);
+                        Swal.fire({icon: 'success', title: 'ยินดีต้อนรับกลับ!', timer: 1500, showConfirmButton: false});
+                    } else {
+                        await createUserWithEmailAndPassword(auth, email, pass);
+                        Swal.fire({icon: 'success', title: 'สมัครสมาชิกสำเร็จ!', text: 'เริ่มจดสูตรได้เลย', timer: 1500, showConfirmButton: false});
+                    }
+                    modal.close();
+                } catch (err) {
+                    Swal.fire({icon: 'error', title: 'ผิดพลาด', text: err.message});
                 }
             },
-            logout: () => signOut(auth),
 
-            // Recipe Actions
+            logout: () => {
+                Swal.fire({
+                    title: 'ออกจากระบบ?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ใช่',
+                    cancelButtonText: 'ไม่'
+                }).then((result) => {
+                    if (result.isConfirmed) signOut(auth);
+                });
+            },
+
+            // Recipe Functions
+            showCreateModal: () => {
+                document.getElementById('recipe-name').value = '';
+                document.getElementById('recipe-desc').value = '';
+                document.getElementById('ingredient-list').innerHTML = '';
+                app.addIngredientRow(); // Add first row
+                document.getElementById('create_modal').showModal();
+            },
+
             addIngredientRow: () => {
                 const div = document.createElement('div');
-                div.className = 'flex gap-2 mb-2 animate-fade-in';
+                div.className = 'flex gap-2 animate-fade-in';
                 div.innerHTML = `
-                    <input type="text" placeholder="วัตถุดิบ" list="globalIngredients" class="ing-name flex-1 p-2 border rounded text-sm">
-                    <input type="number" placeholder="0" class="ing-qty w-16 p-2 border rounded text-sm text-center">
-                    <select class="ing-unit w-20 p-2 border rounded text-sm bg-white">
-                        <option>กรัม</option><option>ช้อนโต๊ะ</option><option>ช้อนชา</option><option>ถ้วย</option><option>มล.</option><option>ฟอง</option>
-                    </select>
-                    <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 px-1"><i class="fas fa-times"></i></button>
+                    <input type="text" placeholder="วัตถุดิบ (เช่น แป้ง)" class="input input-sm input-bordered flex-1 ing-name">
+                    <input type="text" placeholder="ปริมาณ" class="input input-sm input-bordered w-20 ing-qty">
+                    <input type="text" placeholder="หน่วย" class="input input-sm input-bordered w-20 ing-unit">
+                    <button onclick="this.parentElement.remove()" class="btn btn-sm btn-ghost text-red-500"><i class="fa-solid fa-xmark"></i></button>
                 `;
-                document.getElementById('ingredient-inputs').appendChild(div);
+                document.getElementById('ingredient-list').appendChild(div);
             },
 
             saveRecipe: async () => {
-                const name = document.getElementById('newRecipeName').value;
-                const steps = document.getElementById('newRecipeDesc').value;
-                const ings = [];
-                document.querySelectorAll('#ingredient-inputs > div').forEach(row => {
+                const name = document.getElementById('recipe-name').value;
+                const desc = document.getElementById('recipe-desc').value;
+                const ingredients = [];
+                
+                document.querySelectorAll('#ingredient-list > div').forEach(row => {
                     const n = row.querySelector('.ing-name').value;
                     const q = row.querySelector('.ing-qty').value;
                     const u = row.querySelector('.ing-unit').value;
-                    if(n) ings.push({name: n, qty: q, unit: u});
+                    if(n) ingredients.push({name: n, qty: q, unit: u});
                 });
 
-                if(!name || ings.length === 0) return alert("กรุณากรอกชื่อและวัตถุดิบอย่างน้อย 1 อย่าง");
+                if(!name || ingredients.length === 0) {
+                    return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาใส่ชื่อเมนูและวัตถุดิบอย่างน้อย 1 อย่าง', 'warning');
+                }
 
-                const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+                const code = Math.random().toString(36).substring(2, 8).toUpperCase(); // Gen Code e.g. 5XY9A
                 
                 try {
                     await setDoc(doc(db, "recipes", code), {
-                        name, steps, ingredients: ings,
-                        ownerId: state.user.uid,
-                        createdAt: new Date()
+                        name, desc, ingredients,
+                        ownerId: app.user.uid,
+                        ownerEmail: app.user.email,
+                        createdAt: serverTimestamp()
                     });
-                    alert(`บันทึกสำเร็จ! รหัสสูตรคือ: ${code}`);
-                    app.renderDashboard();
-                } catch (e) {
-                    console.error(e);
-                    alert("บันทึกไม่สำเร็จ");
+                    
+                    document.getElementById('create_modal').close();
+                    Swal.fire({
+                        title: 'บันทึกสำเร็จ!',
+                        html: `รหัสสูตรของคุณคือ: <h1 class="text-4xl font-bold text-orange-600 my-2">${code}</h1>(ส่งรหัสนี้ให้เพื่อนดูได้เลย)`,
+                        icon: 'success'
+                    });
+                    app.showMyRecipes();
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire('Error', 'บันทึกไม่สำเร็จ', 'error');
                 }
             },
 
             deleteRecipe: async (id) => {
-                if(confirm("ต้องการลบสูตรนี้ใช่ไหม?")) {
-                    await deleteDoc(doc(db, "recipes", id));
-                    app.renderDashboard();
+                Swal.fire({
+                    title: 'ยืนยันการลบ?',
+                    text: "ลบแล้วกู้คืนไม่ได้นะ!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'ลบเลย'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        await deleteDoc(doc(db, "recipes", id));
+                        app.showMyRecipes();
+                        Swal.fire('ลบแล้ว!', '', 'success');
+                    }
+                });
+            },
+
+            // Search & Compare
+            searchRecipe: async () => {
+                const code = document.getElementById('search-code').value.trim().toUpperCase();
+                if(!code) return;
+                
+                const resDiv = document.getElementById('search-result');
+                resDiv.innerHTML = '<span class="loading loading-spinner text-warning"></span>';
+
+                const docSnap = await getDoc(doc(db, "recipes", code));
+                if (docSnap.exists()) {
+                    resDiv.innerHTML = templates.recipeCard({id: code, ...docSnap.data()}, false);
+                } else {
+                    resDiv.innerHTML = `<div class="alert alert-error">ไม่พบสูตรจากรหัส ${code}</div>`;
                 }
             },
 
-            // Search & Compare Logic
-            searchRecipeGuest: async () => {
-                const code = document.getElementById('guestSearchCode').value.trim().toUpperCase();
+            fetchCompare: async (inputId, outputId) => {
+                const code = document.getElementById(inputId).value.trim().toUpperCase();
+                const output = document.getElementById(outputId);
                 if(!code) return;
-                
-                const resDiv = document.getElementById('guest-result');
-                resDiv.innerHTML = '<div class="text-center text-white"><i class="fas fa-spinner fa-spin"></i> กำลังค้นหา...</div>';
 
-                try {
-                    const docSnap = await getDoc(doc(db, "recipes", code));
-                    if(docSnap.exists()) {
-                        resDiv.innerHTML = ui.recipeCard({id: code, ...docSnap.data()}, false);
-                    } else {
-                        resDiv.innerHTML = '<div class="bg-red-500/80 text-white p-4 rounded text-center">ไม่พบสูตรจากรหัสนี้</div>';
-                    }
-                } catch(e) { console.error(e); }
+                const docSnap = await getDoc(doc(db, "recipes", code));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    output.innerHTML = `
+                        <div class="bg-white/80 p-4 rounded-xl shadow-inner">
+                            <h3 class="font-bold text-xl text-orange-700">${data.name}</h3>
+                            <div class="divider my-1"></div>
+                            <ul class="text-sm space-y-1">
+                                ${data.ingredients.map(ing => `<li class="flex justify-between"><span>${ing.name}</span> <span class="font-bold">${ing.qty} ${ing.unit}</span></li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    output.innerHTML = `<p class="text-red-500 text-center">ไม่พบข้อมูล</p>`;
+                }
             },
 
-            fetchForCompare: async (inputId, resId) => {
-                const code = document.getElementById(inputId).value.trim().toUpperCase();
-                const resDiv = document.getElementById(resId);
-                if(!code) return;
-
-                try {
-                    const docSnap = await getDoc(doc(db, "recipes", code));
-                    if(docSnap.exists()) {
-                        const data = docSnap.data();
-                        resDiv.innerHTML = `
-                            <div class="w-full text-left">
-                                <h3 class="font-bold text-xl text-chef-600 mb-2">${data.name}</h3>
-                                <div class="space-y-2">
-                                    ${data.ingredients.map(ing => `
-                                        <div class="flex justify-between border-b border-gray-200 pb-1">
-                                            <span>${ing.name}</span>
-                                            <span class="font-bold">${ing.qty} ${ing.unit}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <p class="mt-4 text-sm text-gray-500 bg-gray-50 p-2 rounded">${data.steps}</p>
-                            </div>
-                        `;
-                        resDiv.classList.remove('justify-center', 'text-gray-400', 'border-dashed');
-                        resDiv.classList.add('bg-white');
-                    } else {
-                        resDiv.innerHTML = "ไม่พบข้อมูล";
-                    }
-                } catch(e) { console.error(e); }
+            copyCode: (code) => {
+                navigator.clipboard.writeText(code);
+                const Toast = Swal.mixin({
+                    toast: true, position: 'top-end', showConfirmButton: false, timer: 2000
+                });
+                Toast.fire({ icon: 'success', title: 'คัดลอกรหัสแล้ว: ' + code });
             }
         };
 
-        // Start App
+        document.getElementById('auth-form').addEventListener('submit', app.handleAuth);
         app.init();
     </script>
 </body>
