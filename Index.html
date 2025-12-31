@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aysoot Masterpiece</title>
+    <title>Aysoot Manager</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
@@ -11,11 +11,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        /* --- Theme System --- */
+        /* --- Theme --- */
         :root {
-            --primary: #f59e0b; /* Amber 500 */
+            --primary: #f59e0b;
             --primary-dark: #d97706;
-            --bg: #fffbeb; /* Amber 50 */
+            --bg: #fffbeb;
             --glass: rgba(255, 255, 255, 0.95);
         }
 
@@ -23,83 +23,70 @@
             font-family: 'Prompt', sans-serif;
             background-color: var(--bg);
             color: #451a03;
-            overscroll-behavior-y: none; /* ห้ามดึงจอ */
-            touch-action: manipulation; /* ห้าม double tap zoom */
+            overscroll-behavior-y: none;
+            touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-            padding-bottom: 90px; /* เว้นที่ให้เมนูล่าง */
+            padding-bottom: 90px;
             user-select: none;
         }
-
+        
         input, textarea, select { user-select: text; }
 
-        /* Custom UI Components */
-        .card-glass {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.6);
+        /* UI Elements */
+        .card-stat {
+            background: white; border-radius: 24px;
+            padding: 20px; position: relative; overflow: hidden;
             box-shadow: 0 4px 20px rgba(245, 158, 11, 0.08);
-            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.8);
         }
 
         .input-std {
             width: 100%; padding: 12px 16px;
-            background: #fff; border: 1px solid #fde68a;
-            border-radius: 14px; font-size: 14px;
-            outline: none; transition: 0.2s;
+            background: #fff; border: 1px solid #fed7aa;
+            border-radius: 14px; font-size: 14px; outline: none;
             -webkit-appearance: none;
         }
-        .input-std:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        .input-std:focus { border-color: var(--primary); }
+
+        /* Copy Code Box */
+        .code-box {
+            background: #fff7ed; border: 2px dashed #fcd34d;
+            border-radius: 16px; padding: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
         }
 
-        /* Bottom Navigation */
+        /* Nav */
         .nav-bar {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            height: 75px; background: white;
+            height: 80px; background: white;
             border-top: 1px solid #fed7aa;
             display: grid; grid-template-columns: repeat(4, 1fr);
             padding-bottom: env(safe-area-inset-bottom);
-            z-index: 50; box-shadow: 0 -5px 25px rgba(0,0,0,0.05);
-            border-radius: 20px 20px 0 0;
+            z-index: 50; border-radius: 24px 24px 0 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.03);
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #d6d3d1; transition: 0.3s; cursor: pointer;
+            color: #d6d3d1; transition: 0.2s;
         }
         .nav-item.active { color: var(--primary); }
-        .nav-item.active .icon-wrap { 
-            background: #fff7ed; transform: translateY(-5px); 
-            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
-        }
-        .icon-wrap {
-            width: 40px; height: 40px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            transition: 0.3s; font-size: 18px;
-        }
-        .nav-label { font-size: 10px; font-weight: 600; margin-top: 4px; }
+        .nav-item.active i { transform: translateY(-3px); }
 
-        /* Page Transitions */
-        .page { display: none; padding: 20px; animation: slideUp 0.3s ease-out; }
+        /* List Item */
+        .recipe-item {
+            background: white; padding: 16px; border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            border: 1px solid #fff; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 12px;
+            transition: 0.1s;
+        }
+        .recipe-item:active { transform: scale(0.98); }
+
+        /* Page Anim */
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .page.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Receipt Style Card */
-        .receipt-card {
-            background: white; border-radius: 20px;
-            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            position: relative;
-        }
-        .receipt-header {
-            background: linear-gradient(135deg, #f59e0b, #ea580c);
-            padding: 24px; color: white;
-        }
-        .jagged-line {
-            height: 12px; background: white;
-            mask-image: radial-gradient(circle, transparent 6px, black 6.5px);
-            mask-size: 16px 16px; mask-repeat: repeat-x;
-            margin-top: -6px; position: relative; z-index: 5;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -107,49 +94,51 @@
     <header class="fixed top-0 left-0 w-full h-[60px] bg-white/90 backdrop-blur z-40 flex items-center justify-between px-5 border-b border-orange-100">
         <div class="flex items-center gap-2 text-amber-600">
             <i class="fa-solid fa-fire-burner text-xl"></i>
-            <span class="font-bold text-lg text-slate-800">Aysoot</span>
+            <span class="font-bold text-lg text-slate-800">Aysoot Elite</span>
         </div>
-        <div id="header-profile" class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">User</div>
+        <div id="user-badge" class="text-[10px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100">User</div>
     </header>
     <div class="h-[60px]"></div>
 
     <main class="container mx-auto max-w-md">
 
         <div id="pg-dashboard" class="page active">
-            <h2 class="text-2xl font-bold mb-1 text-slate-800">ภาพรวมธุรกิจ 📊</h2>
-            <p class="text-slate-400 text-sm mb-6">สรุปต้นทุนของคุณวันนี้</p>
+            <h2 class="text-2xl font-bold text-slate-800">ภาพรวมธุรกิจ 📊</h2>
+            <p class="text-slate-400 text-xs mb-6">ข้อมูลสรุปของคุณ</p>
 
             <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="card-glass p-5 relative overflow-hidden">
-                    <div class="absolute -right-3 -top-3 w-16 h-16 bg-amber-100 rounded-full opacity-50"></div>
-                    <p class="text-slate-500 text-xs font-bold">จำนวนสูตร</p>
-                    <p id="dash-total-count" class="text-4xl font-bold text-slate-800 mt-1">0</p>
+                <div class="card-stat">
+                    <div class="absolute -right-2 -top-2 w-16 h-16 bg-blue-50 rounded-full opacity-50"></div>
+                    <i class="fa-solid fa-book-open text-blue-400 text-xl mb-2"></i>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase">สูตรทั้งหมด</p>
+                    <p id="stat-total" class="text-3xl font-bold text-slate-800">0</p>
                 </div>
-                <div class="card-glass p-5 relative overflow-hidden">
-                    <div class="absolute -right-3 -top-3 w-16 h-16 bg-green-100 rounded-full opacity-50"></div>
-                    <p class="text-slate-500 text-xs font-bold">เมนูแนะนำ</p>
-                    <p id="dash-best-item" class="text-sm font-bold text-slate-800 mt-2 truncate">ยังไม่มี</p>
-                    <p id="dash-best-cost" class="text-green-600 font-bold text-xs">0 ฿</p>
+                <div class="card-stat">
+                    <div class="absolute -right-2 -top-2 w-16 h-16 bg-amber-50 rounded-full opacity-50"></div>
+                    <i class="fa-solid fa-star text-amber-400 text-xl mb-2"></i>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase">สูตรแนะนำ</p>
+                    <p id="stat-best" class="text-3xl font-bold text-slate-800">0</p>
                 </div>
             </div>
 
-            <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> ล่าสุด
-            </h3>
-            <div id="recent-container" class="space-y-3 pb-20"></div>
+            <div class="flex justify-between items-center mb-3 px-1">
+                <h3 class="font-bold text-slate-700">รายการล่าสุด</h3>
+                <span class="text-[10px] text-slate-400">กดที่ดาวเพื่อแนะนำ ⭐</span>
+            </div>
+            <div id="list-container" class="pb-20"></div>
         </div>
 
         <div id="pg-search" class="page">
-            <div class="mt-8 bg-white rounded-[30px] p-8 text-center shadow-lg border border-orange-50">
+            <div class="mt-8 bg-white rounded-[32px] p-8 text-center shadow-lg border border-orange-50">
                 <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-500 text-2xl">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <i class="fa-solid fa-search"></i>
                 </div>
-                <h2 class="text-xl font-bold text-slate-800">ค้นหาสูตรลับ</h2>
-                <p class="text-slate-400 text-xs mb-6">กรอกรหัสสูตร 6 หลัก (Code)</p>
+                <h2 class="text-xl font-bold text-slate-800">ค้นหาสูตร</h2>
+                <p class="text-slate-400 text-xs mb-6">กรอกรหัส 6 หลัก ของเพื่อน</p>
                 
-                <input type="text" id="search-input" maxlength="6" class="w-full text-center text-3xl font-bold tracking-[6px] uppercase border-b-2 border-orange-200 py-3 mb-6 focus:border-amber-500 outline-none bg-transparent placeholder-slate-200" placeholder="CODE">
+                <input type="text" id="search-inp" maxlength="6" class="w-full text-center text-3xl font-bold tracking-[8px] uppercase border-b-2 border-orange-200 py-3 mb-6 focus:border-amber-500 outline-none bg-transparent placeholder-slate-200" placeholder="CODE">
                 
-                <button onclick="App.doSearch()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition">
+                <button onclick="App.searchRecipe()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95 transition">
                     ค้นหาทันที
                 </button>
             </div>
@@ -157,80 +146,79 @@
 
         <div id="pg-form" class="page">
             <div class="flex justify-between items-center mb-4">
-                <h2 id="form-header" class="text-xl font-bold">สร้างสูตรใหม่ 🍳</h2>
+                <h2 id="form-title" class="text-xl font-bold">สร้างสูตรใหม่ 🍳</h2>
                 <button onclick="App.resetForm()" class="text-xs text-slate-400">ล้างค่า</button>
             </div>
 
-            <div class="card-glass p-5 mb-4">
-                <label class="text-xs font-bold text-slate-400">ชื่อเมนูอาหาร</label>
-                <input type="text" id="inp-name" class="input-std text-lg font-bold mt-1" placeholder="เช่น กะเพราไก่ไข่ดาว">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-orange-100 mb-4">
+                <label class="text-xs font-bold text-slate-400">ชื่อเมนู</label>
+                <input type="text" id="inp-name" class="input-std font-bold text-lg mt-1" placeholder="เช่น ไก่ทอดหาดใหญ่">
                 
-                <div class="mt-4 flex items-center gap-3">
-                    <input type="checkbox" id="inp-best" class="w-5 h-5 accent-amber-500">
-                    <label for="inp-best" class="text-sm font-bold text-slate-600">ตั้งเป็นเมนูแนะนำ (Highlight)</label>
+                <div class="mt-4 flex items-center gap-2 cursor-pointer" onclick="document.getElementById('inp-best').click()">
+                    <input type="checkbox" id="inp-best" class="w-5 h-5 accent-amber-500 cursor-pointer">
+                    <label class="text-sm font-bold text-slate-600 cursor-pointer">ตั้งเป็นเมนูแนะนำ (Highlight)</label>
                 </div>
             </div>
 
-            <div class="bg-white p-5 rounded-[24px] shadow-sm border border-orange-100 mb-24">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-orange-100 mb-20">
                 <div class="flex justify-between items-end mb-4">
-                    <h3 class="font-bold text-slate-700">วัตถุดิบ & ส่วนผสม</h3>
+                    <h3 class="font-bold text-slate-700">วัตถุดิบ</h3>
                     <div class="text-right">
                         <p class="text-[10px] text-slate-400">ต้นทุนรวม</p>
                         <p id="form-total" class="text-xl font-bold text-green-600">0 ฿</p>
                     </div>
                 </div>
 
-                <div id="ing-container" class="space-y-3 mb-6"></div>
+                <div id="ing-list" class="space-y-3 mb-5"></div>
 
-                <button onclick="App.addIngRow()" class="w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-400 font-bold hover:border-amber-400 hover:text-amber-500 transition mb-6">
-                    <i class="fa-solid fa-plus"></i> เพิ่มรายการ
+                <button onclick="App.addIngRow()" class="w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-400 font-bold hover:border-amber-400 hover:text-amber-500 transition mb-4">
+                    + เพิ่มรายการ
                 </button>
 
-                <button onclick="App.saveRecipe()" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 rounded-xl font-bold text-lg shadow-xl shadow-orange-200 active:scale-95 transition">
-                    บันทึกข้อมูล
+                <button onclick="App.saveRecipe()" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 rounded-xl font-bold shadow-xl active:scale-95 transition">
+                    บันทึกสูตร
                 </button>
             </div>
         </div>
 
         <div id="pg-profile" class="page">
-            <div class="bg-white rounded-[32px] p-8 text-center shadow-lg border border-orange-50 mt-6 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-amber-400 to-orange-500"></div>
-                <div class="relative w-24 h-24 mx-auto -mt-10 mb-4 border-4 border-white rounded-full bg-slate-200 overflow-hidden shadow-md">
-                    <img id="profile-img" src="" class="w-full h-full object-cover">
+            <div class="bg-white rounded-[32px] p-8 text-center shadow-lg border border-orange-50 mt-6">
+                <div class="w-24 h-24 mx-auto mb-4 border-4 border-amber-100 rounded-full bg-slate-200 overflow-hidden">
+                    <img id="pf-img" src="" class="w-full h-full object-cover">
                 </div>
-                <h2 id="profile-name" class="text-xl font-bold text-slate-800">User</h2>
-                <p id="profile-email" class="text-slate-400 text-xs mb-6">email@example.com</p>
-                
-                <div class="space-y-3">
-                    <button onclick="App.editProfile()" class="w-full py-3 bg-slate-50 text-slate-600 rounded-xl font-bold text-sm">แก้ไขชื่อ</button>
-                    <button onclick="App.logout()" class="w-full py-3 bg-red-50 text-red-500 rounded-xl font-bold text-sm">ออกจากระบบ</button>
-                </div>
+                <h2 id="pf-name" class="text-xl font-bold text-slate-800">Username</h2>
+                <p id="pf-email" class="text-slate-400 text-xs mb-6">user@example.com</p>
+                <button onclick="App.logout()" class="w-full py-3 bg-red-50 text-red-500 rounded-xl font-bold text-sm">ออกจากระบบ</button>
             </div>
-            <div class="text-center mt-6 text-[10px] text-slate-300">Aysoot System v3.0</div>
         </div>
 
         <div id="pg-view" class="page">
-            <button onclick="App.nav('dashboard')" class="mb-4 flex items-center gap-2 text-slate-500 font-bold text-sm">
+            <button onclick="App.nav('dashboard')" class="mb-4 text-slate-500 font-bold text-sm flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i> ย้อนกลับ
             </button>
 
-            <div class="receipt-card mb-24">
-                <div class="receipt-header">
-                    <div class="flex justify-between items-start mb-2">
-                        <h1 id="view-name" class="text-2xl font-bold w-3/4 leading-tight">ชื่อเมนู</h1>
-                        <span id="view-id" class="bg-white/20 px-2 py-1 rounded text-[10px] font-mono cursor-pointer" onclick="App.copyId()">#ID</span>
-                    </div>
-                    <p id="view-owner" class="text-sm text-orange-100"><i class="fa-solid fa-chef"></i> โดย Chef</p>
-                    <div class="mt-6 flex justify-between items-end">
+            <div class="code-box">
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-bold">RECIPE CODE</span>
+                    <span id="view-id" class="text-xl font-mono font-bold text-slate-800 tracking-wider">------</span>
+                </div>
+                <button onclick="App.copyCode()" class="bg-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md active:scale-95 transition">
+                    <i class="fa-regular fa-copy mr-1"></i> คัดลอก
+                </button>
+            </div>
+
+            <div class="bg-white rounded-[24px] overflow-hidden shadow-lg border border-slate-100 mb-20 relative">
+                <div class="bg-gradient-to-br from-amber-500 to-orange-600 p-6 text-white">
+                    <h1 id="view-name" class="text-2xl font-bold mb-1">ชื่อเมนู</h1>
+                    <p id="view-owner" class="text-xs opacity-80 mb-6"><i class="fa-solid fa-user"></i> By Chef</p>
+                    <div class="flex justify-between items-end border-t border-white/20 pt-4">
                         <span class="text-sm opacity-90">ต้นทุนสุทธิ</span>
                         <span id="view-cost" class="text-4xl font-bold">0 ฿</span>
                     </div>
                 </div>
-                <div class="jagged-line"></div>
 
-                <div class="p-6 bg-white min-h-[300px]">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 border-b pb-2">รายการวัตถุดิบ</h3>
-                    <ul id="view-list" class="space-y-3"></ul>
+                <div class="p-6">
+                    <ul id="view-items" class="space-y-3"></ul>
                 </div>
 
                 <div id="view-actions" class="p-4 bg-slate-50 flex gap-3 hidden">
@@ -248,34 +236,35 @@
 
     <nav class="nav-bar">
         <div class="nav-item active" onclick="App.nav('dashboard')" id="btn-dashboard">
-            <div class="icon-wrap"><i class="fa-solid fa-house"></i></div>
-            <span class="nav-label">ภาพรวม</span>
+            <i class="fa-solid fa-chart-pie text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">ภาพรวม</span>
         </div>
         <div class="nav-item" onclick="App.nav('search')" id="btn-search">
-            <div class="icon-wrap"><i class="fa-solid fa-magnifying-glass"></i></div>
-            <span class="nav-label">ค้นหา</span>
+            <i class="fa-solid fa-search text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">ค้นหา</span>
         </div>
         <div class="nav-item" onclick="App.nav('form')" id="btn-form">
-            <div class="icon-wrap"><i class="fa-solid fa-plus text-xl"></i></div>
-            <span class="nav-label">เพิ่มสูตร</span>
+            <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-200 -mt-5">
+                <i class="fa-solid fa-plus text-lg"></i>
+            </div>
         </div>
         <div class="nav-item" onclick="App.nav('profile')" id="btn-profile">
-            <div class="icon-wrap"><i class="fa-solid fa-user"></i></div>
-            <span class="nav-label">โปรไฟล์</span>
+            <i class="fa-solid fa-user text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">โปรไฟล์</span>
         </div>
     </nav>
 
-    <div id="auth-modal" class="fixed inset-0 bg-slate-900/90 z-[100] flex items-center justify-center p-6 hidden">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-8 text-center">
-            <div class="w-16 h-16 bg-amber-500 rounded-2xl mx-auto flex items-center justify-center text-white text-3xl mb-6 shadow-lg shadow-orange-200">
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl">
+            <div class="w-16 h-16 bg-gradient-to-tr from-amber-400 to-orange-600 rounded-2xl mx-auto flex items-center justify-center text-white text-2xl mb-6 shadow-lg">
                 <i class="fa-solid fa-utensils"></i>
             </div>
             <h2 class="text-2xl font-bold text-slate-800">เข้าสู่ครัว Aysoot</h2>
-            <p class="text-slate-400 text-sm mb-6">กรุณาเข้าสู่ระบบเพื่อใช้งาน</p>
+            <p class="text-slate-400 text-sm mb-6">ระบบจัดการต้นทุนร้านอาหาร</p>
             <form onsubmit="App.login(event)" class="space-y-4">
-                <input type="email" id="login-email" class="input-std bg-slate-50" placeholder="อีเมล" required>
-                <input type="password" id="login-pass" class="input-std bg-slate-50" placeholder="รหัสผ่าน" required>
-                <button type="submit" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold shadow-lg">เข้าใช้งาน</button>
+                <input type="email" id="log-email" class="input-std bg-slate-50" placeholder="อีเมล" required>
+                <input type="password" id="log-pass" class="input-std bg-slate-50" placeholder="รหัสผ่าน" required>
+                <button type="submit" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold shadow-lg">เข้าสู่ระบบ</button>
             </form>
         </div>
     </div>
@@ -285,160 +274,210 @@
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Firebase Config (เปลี่ยนได้ถ้าต้องการใช้ Project อื่น)
-        const firebaseConfig = {
+        const appFire = initializeApp({
             apiKey: "AIzaSyDVS3zsJSeqOs5Wwpkj-DNbN1vhfc2_3LE",
             authDomain: "aysoot.firebaseapp.com",
             projectId: "aysoot",
             storageBucket: "aysoot.firebasestorage.app",
             messagingSenderId: "56310141842",
             appId: "1:56310141842:web:a08f702a98a39a0eb7274b"
-        };
-
-        const appFire = initializeApp(firebaseConfig);
+        });
         const auth = getAuth(appFire);
         const db = getFirestore(appFire);
 
-        // Variables
-        let currentUser = null;
-        let myRecipes = [];
-        let editId = null; // ถ้ามีค่า = กำลังแก้ไข
-        let viewId = null; // ID ที่กำลังดูอยู่
+        let user = null;
+        let recipes = [];
+        let editId = null;
+        let viewId = null;
 
-        // Unit List
-        const units = ["กรัม", "กก.", "มล.", "ลิตร", "ช้อนโต๊ะ", "ช้อนชา", "ถ้วย", "ฟอง", "ชิ้น", "มัด", "กล่อง"];
+        const units = ["กรัม", "กก.", "มล.", "ลิตร", "ช้อนโต๊ะ", "ช้อนชา", "ฟอง", "ชิ้น", "ถ้วย", "มัด", "แพ็ค"];
 
         window.App = {
             init: () => {
-                onAuthStateChanged(auth, user => {
-                    currentUser = user;
+                onAuthStateChanged(auth, u => {
+                    user = u;
                     const modal = document.getElementById('auth-modal');
-                    if(user) {
-                        modal.classList.add('hidden');
-                        App.updateUIUser(user);
+                    if(u) {
+                        modal.style.display = 'none';
+                        App.updateProfileUI(u);
                         App.loadData();
                         App.nav('dashboard');
                     } else {
-                        modal.classList.remove('hidden');
+                        modal.style.display = 'flex';
                     }
                 });
             },
 
-            updateUIUser: (u) => {
-                document.getElementById('header-profile').innerText = u.displayName || 'Chef';
-                document.getElementById('profile-name').innerText = u.displayName || 'Chef';
-                document.getElementById('profile-email').innerText = u.email;
-                document.getElementById('profile-img').src = `https://ui-avatars.com/api/?name=${u.displayName}&background=f59e0b&color=fff`;
+            updateProfileUI: (u) => {
+                document.getElementById('user-badge').innerText = u.displayName || 'Chef';
+                document.getElementById('pf-name').innerText = u.displayName || 'Chef';
+                document.getElementById('pf-email').innerText = u.email;
+                document.getElementById('pf-img').src = `https://ui-avatars.com/api/?name=${u.displayName}&background=f59e0b&color=fff&bold=true`;
             },
 
             login: async (e) => {
                 e.preventDefault();
-                const em = document.getElementById('login-email').value;
-                const pw = document.getElementById('login-pass').value;
                 try {
-                    await signInWithEmailAndPassword(auth, em, pw);
-                } catch(err) { Swal.fire('Error', 'Login Failed', 'error'); }
+                    await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value);
+                } catch(err) { Swal.fire('Error', 'Login failed', 'error'); }
             },
-
             logout: () => signOut(auth),
 
-            // --- Navigation ---
-            nav: (page) => {
-                // Reset Active States
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-                // Activate
-                document.getElementById(`pg-${page}`).classList.add('active');
-                const btn = document.getElementById(`btn-${page}`);
+            nav: (p) => {
+                document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+                
+                document.getElementById(`pg-${p}`).classList.add('active');
+                const btn = document.getElementById(`btn-${p}`);
                 if(btn) btn.classList.add('active');
 
-                // Special logic
-                if(page === 'form' && !editId) App.resetForm();
+                if(p === 'form' && !editId) App.resetForm();
             },
 
-            // --- Dashboard & Data ---
+            // --- DATA & DASHBOARD ---
             loadData: async () => {
-                if(!currentUser) return;
-                const q = query(collection(db, "recipes"), where("ownerId", "==", currentUser.uid));
+                if(!user) return;
+                const q = query(collection(db, "recipes"), where("ownerId", "==", user.uid));
                 const snap = await getDocs(q);
-                myRecipes = [];
-                snap.forEach(d => myRecipes.push({id: d.id, ...d.data()}));
-                myRecipes.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0)); // ใหม่สุดขึ้นก่อน
-                
+                recipes = [];
+                snap.forEach(d => recipes.push({id: d.id, ...d.data()}));
+                recipes.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
                 App.renderDashboard();
             },
 
             renderDashboard: () => {
-                document.getElementById('dash-total-count').innerText = myRecipes.length;
-                
-                // Best Menu
-                const best = myRecipes.find(r => r.isBest);
-                if(best) {
-                    document.getElementById('dash-best-item').innerText = best.name;
-                    document.getElementById('dash-best-cost').innerText = parseFloat(best.totalCost).toLocaleString() + ' ฿';
-                } else {
-                    document.getElementById('dash-best-item').innerText = "ยังไม่มี";
-                    document.getElementById('dash-best-cost').innerText = "-";
-                }
+                // Count Stats
+                const total = recipes.length;
+                const bestCount = recipes.filter(r => r.isBest).length;
 
-                // Recent List
-                const con = document.getElementById('recent-container');
+                document.getElementById('stat-total').innerText = total;
+                document.getElementById('stat-best').innerText = bestCount;
+
+                // Render List
+                const con = document.getElementById('list-container');
                 con.innerHTML = "";
-                myRecipes.slice(0, 10).forEach(r => {
-                    con.innerHTML += `
-                        <div onclick="App.openView('${r.id}', true)" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center cursor-pointer active:bg-slate-50 transition">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg ${r.isBest ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'} flex items-center justify-center font-bold">
-                                    ${r.name.charAt(0)}
-                                </div>
-                                <div>
-                                    <div class="font-bold text-slate-700 text-sm">${r.name}</div>
-                                    <div class="text-[10px] text-slate-400">${r.ingredients.length} วัตถุดิบ</div>
-                                </div>
-                            </div>
-                            <div class="font-bold text-green-600">${parseFloat(r.totalCost).toLocaleString()} ฿</div>
+                if(recipes.length === 0) con.innerHTML = `<p class="text-center text-slate-300 mt-10">ยังไม่มีข้อมูล</p>`;
+                
+                recipes.forEach(r => {
+                    const isBest = r.isBest;
+                    const div = document.createElement('div');
+                    div.className = "recipe-item relative";
+                    div.innerHTML = `
+                        <div onclick="App.toggleBest('${r.id}', ${isBest})" class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition ${isBest ? 'bg-amber-100 text-amber-500' : 'bg-slate-100 text-slate-300'}">
+                            <i class="fa-solid fa-star text-lg"></i>
+                        </div>
+                        <div class="flex-1 cursor-pointer" onclick="App.openView('${r.id}', true)">
+                            <h4 class="font-bold text-slate-800">${r.name}</h4>
+                            <span class="text-[10px] text-slate-400 font-mono">ID: ${r.id}</span>
+                        </div>
+                        <div class="text-right cursor-pointer" onclick="App.openView('${r.id}', true)">
+                            <p class="font-bold text-green-600 text-lg">${parseFloat(r.totalCost).toLocaleString()}</p>
+                            <p class="text-[10px] text-slate-400">บาท</p>
                         </div>
                     `;
+                    con.appendChild(div);
                 });
             },
 
-            // --- Form Logic ---
+            toggleBest: async (id, currentVal) => {
+                // Optimistic Update
+                const r = recipes.find(x => x.id === id);
+                if(r) r.isBest = !currentVal;
+                App.renderDashboard();
+
+                try {
+                    await updateDoc(doc(db, "recipes", id), { isBest: !currentVal });
+                } catch(e) { console.error(e); App.loadData(); }
+            },
+
+            // --- VIEW & ACTIONS ---
+            openView: (id, isMyList, data = null) => {
+                viewId = id;
+                const r = isMyList ? recipes.find(x => x.id === id) : data;
+                if(!r) return;
+
+                document.getElementById('view-name').innerText = r.name;
+                document.getElementById('view-id').innerText = id;
+                document.getElementById('view-cost').innerText = parseFloat(r.totalCost).toLocaleString() + " ฿";
+                document.getElementById('view-owner').innerHTML = `<i class="fa-solid fa-user-circle"></i> โดย ${r.ownerName}`;
+                
+                const ul = document.getElementById('view-items');
+                ul.innerHTML = "";
+                r.ingredients.forEach(i => {
+                    ul.innerHTML += `
+                        <li class="flex justify-between py-2 border-b border-dashed border-slate-200">
+                            <div>
+                                <div class="text-slate-700 font-medium text-sm">${i.name}</div>
+                                <div class="text-[10px] text-slate-400">${i.qty} ${i.unit}</div>
+                            </div>
+                            <div class="font-bold text-slate-800 text-sm">${parseFloat(i.price).toLocaleString()}</div>
+                        </li>
+                    `;
+                });
+
+                const acts = document.getElementById('view-actions');
+                if(user && r.ownerId === user.uid) acts.classList.remove('hidden');
+                else acts.classList.add('hidden');
+
+                App.nav('view');
+            },
+
+            copyCode: () => {
+                navigator.clipboard.writeText(viewId);
+                Swal.fire({
+                    toast: true, position: 'top', 
+                    icon: 'success', title: 'คัดลอกรหัสแล้ว!', 
+                    showConfirmButton: false, timer: 1500
+                });
+            },
+
+            searchRecipe: async () => {
+                const code = document.getElementById('search-inp').value.trim();
+                if(code.length < 3) return;
+                try {
+                    Swal.showLoading();
+                    const s = await getDoc(doc(db, "recipes", code));
+                    Swal.close();
+                    if(s.exists()) App.openView(code, false, s.data());
+                    else Swal.fire('ไม่พบข้อมูล', 'รหัสไม่ถูกต้อง', 'error');
+                } catch(e) { console.log(e); }
+            },
+
+            // --- FORM (CREATE/EDIT) ---
             resetForm: () => {
                 editId = null;
-                document.getElementById('form-header').innerText = "สร้างสูตรใหม่ 🍳";
+                document.getElementById('form-title').innerText = "สร้างสูตรใหม่ 🍳";
                 document.getElementById('inp-name').value = "";
                 document.getElementById('inp-best').checked = false;
-                document.getElementById('ing-container').innerHTML = "";
+                document.getElementById('ing-list').innerHTML = "";
                 document.getElementById('form-total').innerText = "0 ฿";
                 App.addIngRow();
             },
 
             addIngRow: (data = null) => {
                 const div = document.createElement('div');
-                div.className = "ing-row bg-slate-50 p-3 rounded-2xl border border-slate-100 relative mb-2";
+                div.className = "ing-row flex gap-2 mb-2 animate-pulse-once";
+                let ops = units.map(u => `<option value="${u}" ${data?.unit===u?'selected':''}>${u}</option>`).join('');
                 
-                // Build Options
-                let ops = "";
-                units.forEach(u => ops += `<option value="${u}" ${data?.unit===u?'selected':''}>${u}</option>`);
-
                 div.innerHTML = `
-                    <div class="flex gap-2 mb-2">
-                        <input type="text" class="input-std i-name font-bold" placeholder="ชื่อวัตถุดิบ" value="${data?.name||''}">
-                        <button onclick="this.parentElement.parentElement.remove(); App.calcTotal()" class="w-10 h-10 bg-white text-red-500 rounded-xl border border-red-100 flex items-center justify-center shadow-sm"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="number" class="input-std i-qty text-center" placeholder="จำนวน" value="${data?.qty||''}">
-                        <select class="input-std i-unit text-sm bg-white appearance-none">${ops}</select>
-                        <input type="number" class="input-std i-price text-right font-bold text-green-600" placeholder="ราคา" oninput="App.calcTotal()" value="${data?.price||''}">
+                    <div class="flex-1 space-y-2">
+                        <div class="flex gap-2">
+                            <input type="text" class="input-std i-name font-bold" placeholder="ชื่อวัตถุดิบ" value="${data?.name||''}">
+                            <button onclick="this.closest('.ing-row').remove(); App.calcTotal()" class="w-10 bg-red-50 text-red-500 rounded-lg border border-red-100"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="number" class="input-std i-qty w-20 text-center" placeholder="จำนวน" value="${data?.qty||''}">
+                            <select class="input-std i-unit w-20 bg-white p-0 text-center text-xs">${ops}</select>
+                            <input type="number" class="input-std i-price flex-1 text-right font-bold text-green-600" placeholder="ราคา" oninput="App.calcTotal()" value="${data?.price||''}">
+                        </div>
                     </div>
                 `;
-                document.getElementById('ing-container').appendChild(div);
+                document.getElementById('ing-list').appendChild(div);
             },
 
             calcTotal: () => {
                 let sum = 0;
-                document.querySelectorAll('.i-price').forEach(el => sum += parseFloat(el.value) || 0);
+                document.querySelectorAll('.i-price').forEach(e => sum += parseFloat(e.value)||0);
                 document.getElementById('form-total').innerText = sum.toLocaleString() + " ฿";
                 return sum;
             },
@@ -455,12 +494,12 @@
                     if(n) ings.push({name:n, qty:q, unit:u, price:p});
                 });
 
-                if(!name || ings.length === 0) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกชื่อและวัตถุดิบ', 'warning');
-
+                if(!name || ings.length === 0) return Swal.fire('ข้อมูลไม่ครบ', '', 'warning');
+                
                 const total = App.calcTotal();
                 const payload = {
                     name, ingredients: ings, isBest, totalCost: total,
-                    ownerId: currentUser.uid, ownerName: currentUser.displayName,
+                    ownerId: user.uid, ownerName: user.displayName,
                     updatedAt: serverTimestamp()
                 };
 
@@ -473,120 +512,36 @@
                         payload.createdAt = serverTimestamp();
                         await setDoc(doc(db, "recipes", newId), payload);
                     }
-                    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', timer: 1000, showConfirmButton: false });
+                    Swal.fire({icon:'success', title:'บันทึกแล้ว', timer:1000, showConfirmButton:false});
                     App.loadData();
                     App.nav('dashboard');
                 } catch(e) { Swal.fire('Error', e.message, 'error'); }
             },
 
-            // --- View & Search ---
-            doSearch: async () => {
-                const code = document.getElementById('search-input').value.trim();
-                if(code.length < 3) return;
-                try {
-                    Swal.showLoading();
-                    const snap = await getDoc(doc(db, "recipes", code));
-                    Swal.close();
-                    if(snap.exists()) {
-                        App.openView(code, false, snap.data()); // Force not owner initially
-                    } else {
-                        Swal.fire('ไม่พบข้อมูล', 'รหัสสูตรไม่ถูกต้อง', 'error');
-                    }
-                } catch(e) { console.error(e); }
-            },
-
-            openView: (id, fromMyList = false, directData = null) => {
-                viewId = id;
-                let data = directData;
-                
-                if(fromMyList) {
-                    data = myRecipes.find(r => r.id === id);
-                }
-
-                // Render Data
-                document.getElementById('view-name').innerText = data.name;
-                document.getElementById('view-id').innerText = "#" + id;
-                document.getElementById('view-owner').innerHTML = `<i class="fa-solid fa-user-tag"></i> โดย ${data.ownerName}`;
-                document.getElementById('view-cost').innerText = parseFloat(data.totalCost).toLocaleString() + " ฿";
-
-                const ul = document.getElementById('view-list');
-                ul.innerHTML = "";
-                data.ingredients.forEach(i => {
-                    ul.innerHTML += `
-                        <li class="flex justify-between items-center py-3 border-b border-dashed border-slate-200 last:border-0">
-                            <div class="flex flex-col">
-                                <span class="text-slate-700 font-medium">${i.name}</span>
-                                <span class="text-xs text-slate-400">${i.qty} ${i.unit}</span>
-                            </div>
-                            <span class="font-bold text-slate-800">${parseFloat(i.price).toLocaleString()}</span>
-                        </li>
-                    `;
-                });
-
-                // Check Ownership
-                const actions = document.getElementById('view-actions');
-                if(currentUser && data.ownerId === currentUser.uid) {
-                    actions.classList.remove('hidden');
-                    actions.classList.add('flex');
-                } else {
-                    actions.classList.add('hidden');
-                    actions.classList.remove('flex');
-                }
-
-                App.nav('view');
-            },
-
             editCurrent: () => {
-                editId = viewId; // Set Edit Mode
-                const data = myRecipes.find(r => r.id === viewId);
-                if(!data) return;
-
-                document.getElementById('form-header').innerText = "แก้ไขสูตร 📝";
-                document.getElementById('inp-name').value = data.name;
-                document.getElementById('inp-best').checked = data.isBest;
-                
-                const con = document.getElementById('ing-container');
-                con.innerHTML = "";
-                data.ingredients.forEach(i => App.addIngRow(i));
+                const r = recipes.find(x => x.id === viewId);
+                if(!r) return;
+                editId = viewId;
+                document.getElementById('form-title').innerText = "แก้ไขสูตร 📝";
+                document.getElementById('inp-name').value = r.name;
+                document.getElementById('inp-best').checked = r.isBest;
+                document.getElementById('ing-list').innerHTML = "";
+                r.ingredients.forEach(i => App.addIngRow(i));
                 App.calcTotal();
-                
                 App.nav('form');
             },
 
-            deleteCurrent: async () => {
+            deleteCurrent: () => {
                 Swal.fire({
-                    title: 'ลบสูตรนี้?',
-                    text: "ไม่สามารถกู้คืนได้นะ",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'ลบเลย',
-                    confirmButtonColor: '#ef4444'
-                }).then(async (res) => {
-                    if(res.isConfirmed) {
+                    title: 'ลบสูตร?', icon: 'warning',
+                    showCancelButton: true, confirmButtonText: 'ลบเลย', confirmButtonColor: '#ef4444'
+                }).then(async r => {
+                    if(r.isConfirmed) {
                         await deleteDoc(doc(db, "recipes", viewId));
                         App.loadData();
                         App.nav('dashboard');
-                        Swal.fire('เรียบร้อย', '', 'success');
                     }
-                });
-            },
-
-            copyId: () => {
-                navigator.clipboard.writeText(viewId);
-                Swal.fire({toast: true, position: 'top', icon: 'success', title: 'คัดลอก ID แล้ว', timer: 1500, showConfirmButton: false});
-            },
-
-            editProfile: async () => {
-                const { value: name } = await Swal.fire({
-                    title: 'เปลี่ยนชื่อแสดงผล',
-                    input: 'text',
-                    inputValue: currentUser.displayName,
-                    showCancelButton: true
-                });
-                if(name) {
-                    await updateProfile(currentUser, { displayName: name });
-                    App.updateUIUser(currentUser);
-                }
+                })
             }
         };
 
